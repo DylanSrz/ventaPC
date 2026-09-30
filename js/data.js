@@ -8,6 +8,8 @@
  *    "galeria" son fotos extra que se ven en la ficha del producto.
  *  - Para marcar algo como vendido: vendido: true
  *  - cantidad: 2 multiplica el precio de referencia (ej. dos monitores)
+ *  - precioReferencia: precio NUEVO en tiendas de Colombia (sep. 2026);
+ *    fuentePrecio dice de dónde salió y se muestra en la ficha.
  */
 window.VENTA = {
   config: {
@@ -26,6 +28,8 @@ window.VENTA = {
     estado: "2 años de uso",
     garantia: "Sin garantía vigente",
     moneda: "COP",
+    // Texto que acompaña a los precios de referencia en la página
+    notaPrecios: "Precios de referencia de productos nuevos en tiendas de Colombia (septiembre 2026).",
   },
 
   // Fotos reales del equipo: pon los archivos en img/reales/ y agrégalos aquí.
@@ -38,9 +42,10 @@ window.VENTA = {
       categoria: "Tarjeta gráfica",
       nombre: "MSI GeForce RTX™ 4060 GAMING X NV EDITION 8G",
       corto: "RTX 4060 8G",
-      precioReferencia: 2500000,
+      precioReferencia: 1759000,
+      fuentePrecio: "SpeedLogic, último precio publicado (agotado)",
       imagen: "img/productos/gpu.webp",
-      galeria: ["img/productos/gpu-2.webp"],
+      galeria: ["img/productos/gpu-2.webp", "img/productos/gpu-3.webp"],
       link: "https://latam.msi.com/Graphics-Card/GeForce-RTX-4060-GAMING-X-NV-EDITION-8G",
       video: "KumnfpvlW6A",
       destacado: "DLSS 3 + Frame Generation",
@@ -59,9 +64,10 @@ window.VENTA = {
       categoria: "Procesador",
       nombre: "Intel® Core™ i5-12600KF",
       corto: "i5-12600KF",
-      precioReferencia: 950000,
+      precioReferencia: 850000,
+      fuentePrecio: "Promedio MercadoLibre Colombia ($769.900 – $900.000)",
       imagen: "img/productos/cpu.webp",
-      galeria: ["img/productos/cpu-2.webp"],
+      galeria: ["img/productos/cpu-2.webp", "img/productos/cpu-3.webp"],
       link: "https://www.intel.com/content/www/us/en/products/sku/134590/intel-core-i512600kf-processor-20m-cache-up-to-4-90-ghz/specifications.html",
       destacado: "Desbloqueado para overclock",
       specs: [
@@ -78,9 +84,10 @@ window.VENTA = {
       categoria: "Board",
       nombre: "GIGABYTE Z690 AORUS ULTRA",
       corto: "Z690 AORUS ULTRA",
-      precioReferencia: 2500000,
+      precioReferencia: 1315000,
+      fuentePrecio: "Ya no se vende nueva; equivalente actual Z790 AORUS ELITE AX en SpeedLogic",
       imagen: "img/productos/mobo.webp",
-      galeria: ["img/productos/mobo-2.webp", "img/productos/mobo-3.webp"],
+      galeria: ["img/productos/mobo-2.webp", "img/productos/mobo-3.webp", "img/productos/mobo-4.webp", "img/productos/mobo-5.webp"],
       link: "https://www.aorus.com/motherboards/z690-aorus-ultra-rev-1x/Key-Features",
       destacado: "PCIe 5.0 + DDR5",
       specs: [
@@ -98,9 +105,10 @@ window.VENTA = {
       categoria: "Memoria RAM",
       nombre: "CORSAIR VENGEANCE RGB DDR5 32 GB (2×16 GB) 6000 MHz C36",
       corto: "32 GB DDR5",
-      precioReferencia: 2200000,
+      precioReferencia: 1970000,
+      fuentePrecio: "Promedio de 3 kits DDR5 32 GB 6000 MHz RGB (Falabella, SpeedLogic, Gamers Colombia)",
       imagen: "img/productos/ram.webp",
-      galeria: ["img/productos/ram-2.webp"],
+      galeria: ["img/productos/ram-2.webp", "img/productos/ram-3.webp", "img/productos/ram-4.webp"],
       link: "https://www.corsair.com/ww/es/p/memory/cmh32gx5m2d6000c36/vengeance-rgb-32gb-2x16gb-ddr5-dram-6000mhz-c36-memory-kit-black-cmh32gx5m2d6000c36",
       destacado: "RGB direccionable",
       specs: [
@@ -116,9 +124,10 @@ window.VENTA = {
       categoria: "Refrigeración líquida",
       nombre: "MSI MAG CORELIQUID C240",
       corto: "AIO 240 mm",
-      precioReferencia: 700000,
+      precioReferencia: 485000,
+      fuentePrecio: "SpeedLogic, último precio publicado",
       imagen: "img/productos/cooler.webp",
-      galeria: ["img/productos/cooler-2.webp"],
+      galeria: ["img/productos/cooler-2.webp", "img/productos/cooler-3.webp"],
       link: "https://latam.msi.com/Liquid-Cooling/MAG-CORELIQUID-C240",
       destacado: "ARGB en bloque y ventiladores",
       specs: [
@@ -134,9 +143,10 @@ window.VENTA = {
       categoria: "Fuente de poder",
       nombre: "CORSAIR RM750x 80 PLUS Gold",
       corto: "750 W Gold",
-      precioReferencia: 750000,
+      precioReferencia: 579000,
+      fuentePrecio: "Corsair RM750 Gold modular en SpeedLogic, último precio publicado",
       imagen: "img/productos/psu.webp",
-      galeria: ["img/productos/psu-2.webp"],
+      galeria: ["img/productos/psu-2.webp", "img/productos/psu-3.webp", "img/productos/psu-4.webp", "img/productos/psu-5.webp"],
       link: "https://www.corsair.com/lm/es/p/psu/cp-9020179-na/rmx-series-rm750x-750-watt-80-plus-gold-certified-fully-modular-psu-cp-9020179-na",
       destacado: "100 % modular",
       specs: [
@@ -152,9 +162,10 @@ window.VENTA = {
       categoria: "Almacenamiento",
       nombre: "Samsung 990 PRO 1 TB PCIe 4.0 NVMe M.2",
       corto: "SSD 1 TB NVMe",
-      precioReferencia: 1200000,
+      precioReferencia: 1149000,
+      fuentePrecio: "SpeedLogic",
       imagen: "img/productos/ssd.webp",
-      galeria: ["img/productos/ssd-2.webp", "img/productos/ssd-3.webp"],
+      galeria: ["img/productos/ssd-2.webp", "img/productos/ssd-3.webp", "img/productos/ssd-4.webp", "img/productos/ssd-5.webp"],
       link: "https://www.samsung.com/es/memory-storage/nvme-ssd/990-pro-1tb-nvme-pcie-gen-4-mz-v9p1t0bw/#specs",
       destacado: "Hasta 7450 MB/s",
       specs: [
@@ -170,9 +181,10 @@ window.VENTA = {
       categoria: "Gabinete",
       nombre: "Cooler Master MasterBox TD500 Mesh V2",
       corto: "TD500 Mesh V2",
-      precioReferencia: null,
+      precioReferencia: 415000,
+      fuentePrecio: "SpeedLogic, último precio publicado",
       imagen: "img/productos/gabinete.webp",
-      galeria: ["img/productos/gabinete-2.webp", "img/productos/gabinete-3.webp"],
+      galeria: ["img/productos/gabinete-2.webp", "img/productos/gabinete-3.webp", "img/productos/gabinete-4.webp", "img/productos/gabinete-5.webp"],
       link: "https://www.coolermaster.com/es-global/products/masterbox-td500-mesh-v2.html",
       destacado: "3 ventiladores ARGB",
       specs: [
@@ -194,9 +206,10 @@ window.VENTA = {
       nombre: "LG UltraGear 24GQ50F-B",
       cantidad: 2,
       corto: "2× 24\" 165 Hz",
-      precioReferencia: null,
+      precioReferencia: 589000,
+      fuentePrecio: "SpeedLogic, último precio publicado (por unidad)",
       imagen: "img/productos/monitor.webp",
-      galeria: ["img/productos/monitor-2.webp", "img/productos/monitor-3.webp"],
+      galeria: ["img/productos/monitor-2.webp", "img/productos/monitor-3.webp", "img/productos/monitor-4.webp"],
       link: "https://www.lg.com/es/monitores/monitores-ultragear-gaming/24gq50f-b/",
       destacado: "Doble pantalla · 165 Hz",
       specs: [
@@ -212,9 +225,10 @@ window.VENTA = {
       categoria: "Soporte de monitor",
       nombre: "HUANUO Soporte doble para monitor",
       corto: "Brazo doble",
-      precioReferencia: null,
+      precioReferencia: 349900,
+      fuentePrecio: "Brazo doble 13\"–32\" con resortes en Éxito",
       imagen: "img/productos/soporte.webp",
-      galeria: ["img/productos/soporte-2.webp"],
+      galeria: ["img/productos/soporte-2.webp", "img/productos/soporte-3.webp", "img/productos/soporte-4.webp", "img/productos/soporte-5.webp"],
       link: "https://www.amazon.com/dp/B07T5SY43L",
       destacado: "Movimiento completo",
       specs: [
@@ -229,9 +243,10 @@ window.VENTA = {
       categoria: "Teclado",
       nombre: "Redragon Horus K619",
       corto: "Mecánico low profile",
-      precioReferencia: null,
+      precioReferencia: 299900,
+      fuentePrecio: "Gamers Colombia",
       imagen: "img/productos/teclado.webp",
-      galeria: ["img/productos/teclado-2.webp"],
+      galeria: ["img/productos/teclado-2.webp", "img/productos/teclado-3.webp", "img/productos/teclado-4.webp", "img/productos/teclado-5.webp"],
       link: "https://redragon.es/products/best-seller/teclado-low-profile-horus-tkl-fullsize-60/",
       destacado: "Switches rojos low profile",
       specs: [
@@ -247,9 +262,10 @@ window.VENTA = {
       categoria: "Micrófono",
       nombre: "HyperX QuadCast S",
       corto: "QuadCast S",
-      precioReferencia: null,
+      precioReferencia: 589900,
+      fuentePrecio: "Gamers Colombia",
       imagen: "img/productos/mic.webp",
-      galeria: ["img/productos/mic-2.webp", "img/productos/mic-3.webp"],
+      galeria: ["img/productos/mic-2.webp", "img/productos/mic-3.webp", "img/productos/mic-4.webp", "img/productos/mic-5.webp"],
       link: "https://row.hyperx.com/es/products/hyperx-quadcast-s-usb-microphone",
       destacado: "RGB + tap-to-mute",
       specs: [
@@ -264,9 +280,10 @@ window.VENTA = {
       categoria: "Cámara",
       nombre: "Logitech StreamCam",
       corto: "1080p 60 fps",
-      precioReferencia: null,
+      precioReferencia: 635986,
+      fuentePrecio: "Éxito",
       imagen: "img/productos/cam.webp",
-      galeria: ["img/productos/cam-2.webp", "img/productos/cam-3.webp"],
+      galeria: ["img/productos/cam-2.webp", "img/productos/cam-3.webp", "img/productos/cam-4.webp", "img/productos/cam-5.webp"],
       link: "https://www.logitech.com/es-ar/shop/p/streamcam.960-001280",
       destacado: "Full HD a 60 fps",
       specs: [
