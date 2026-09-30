@@ -5,6 +5,7 @@
  *  - Precios en pesos colombianos, sin puntos: 2500000
  *  - Imágenes: pon el archivo en img/productos/ con el nombre indicado
  *    en "imagen". Si no existe, se muestra un ícono en su lugar.
+ *    "galeria" son fotos extra que se ven en la ficha del producto.
  *  - Para marcar algo como vendido: vendido: true
  *  - cantidad: 2 multiplica el precio de referencia (ej. dos monitores)
  */
@@ -39,6 +40,7 @@ window.VENTA = {
       corto: "RTX 4060 8G",
       precioReferencia: 2500000,
       imagen: "img/productos/gpu.webp",
+      galeria: ["img/productos/gpu-2.webp"],
       link: "https://latam.msi.com/Graphics-Card/GeForce-RTX-4060-GAMING-X-NV-EDITION-8G",
       video: "KumnfpvlW6A",
       destacado: "DLSS 3 + Frame Generation",
@@ -59,6 +61,7 @@ window.VENTA = {
       corto: "i5-12600KF",
       precioReferencia: 950000,
       imagen: "img/productos/cpu.webp",
+      galeria: ["img/productos/cpu-2.webp"],
       link: "https://www.intel.com/content/www/us/en/products/sku/134590/intel-core-i512600kf-processor-20m-cache-up-to-4-90-ghz/specifications.html",
       destacado: "Desbloqueado para overclock",
       specs: [
@@ -77,6 +80,7 @@ window.VENTA = {
       corto: "Z690 AORUS ULTRA",
       precioReferencia: 2500000,
       imagen: "img/productos/mobo.webp",
+      galeria: ["img/productos/mobo-2.webp", "img/productos/mobo-3.webp"],
       link: "https://www.aorus.com/motherboards/z690-aorus-ultra-rev-1x/Key-Features",
       destacado: "PCIe 5.0 + DDR5",
       specs: [
@@ -96,6 +100,7 @@ window.VENTA = {
       corto: "32 GB DDR5",
       precioReferencia: 2200000,
       imagen: "img/productos/ram.webp",
+      galeria: ["img/productos/ram-2.webp"],
       link: "https://www.corsair.com/ww/es/p/memory/cmh32gx5m2d6000c36/vengeance-rgb-32gb-2x16gb-ddr5-dram-6000mhz-c36-memory-kit-black-cmh32gx5m2d6000c36",
       destacado: "RGB direccionable",
       specs: [
@@ -113,6 +118,7 @@ window.VENTA = {
       corto: "AIO 240 mm",
       precioReferencia: 700000,
       imagen: "img/productos/cooler.webp",
+      galeria: ["img/productos/cooler-2.webp"],
       link: "https://latam.msi.com/Liquid-Cooling/MAG-CORELIQUID-C240",
       destacado: "ARGB en bloque y ventiladores",
       specs: [
@@ -130,6 +136,7 @@ window.VENTA = {
       corto: "750 W Gold",
       precioReferencia: 750000,
       imagen: "img/productos/psu.webp",
+      galeria: ["img/productos/psu-2.webp"],
       link: "https://www.corsair.com/lm/es/p/psu/cp-9020179-na/rmx-series-rm750x-750-watt-80-plus-gold-certified-fully-modular-psu-cp-9020179-na",
       destacado: "100 % modular",
       specs: [
@@ -147,6 +154,7 @@ window.VENTA = {
       corto: "SSD 1 TB NVMe",
       precioReferencia: 1200000,
       imagen: "img/productos/ssd.webp",
+      galeria: ["img/productos/ssd-2.webp", "img/productos/ssd-3.webp"],
       link: "https://www.samsung.com/es/memory-storage/nvme-ssd/990-pro-1tb-nvme-pcie-gen-4-mz-v9p1t0bw/#specs",
       destacado: "Hasta 7450 MB/s",
       specs: [
@@ -164,6 +172,7 @@ window.VENTA = {
       corto: "TD500 Mesh V2",
       precioReferencia: null,
       imagen: "img/productos/gabinete.webp",
+      galeria: ["img/productos/gabinete-2.webp", "img/productos/gabinete-3.webp"],
       link: "https://www.coolermaster.com/es-global/products/masterbox-td500-mesh-v2.html",
       destacado: "3 ventiladores ARGB",
       specs: [
@@ -187,6 +196,7 @@ window.VENTA = {
       corto: "2× 24\" 165 Hz",
       precioReferencia: null,
       imagen: "img/productos/monitor.webp",
+      galeria: ["img/productos/monitor-2.webp", "img/productos/monitor-3.webp"],
       link: "https://www.lg.com/es/monitores/monitores-ultragear-gaming/24gq50f-b/",
       destacado: "Doble pantalla · 165 Hz",
       specs: [
@@ -204,6 +214,7 @@ window.VENTA = {
       corto: "Brazo doble",
       precioReferencia: null,
       imagen: "img/productos/soporte.webp",
+      galeria: ["img/productos/soporte-2.webp"],
       link: "https://www.amazon.com/dp/B07T5SY43L",
       destacado: "Movimiento completo",
       specs: [
@@ -220,6 +231,7 @@ window.VENTA = {
       corto: "Mecánico low profile",
       precioReferencia: null,
       imagen: "img/productos/teclado.webp",
+      galeria: ["img/productos/teclado-2.webp"],
       link: "https://redragon.es/products/best-seller/teclado-low-profile-horus-tkl-fullsize-60/",
       destacado: "Switches rojos low profile",
       specs: [
@@ -237,6 +249,7 @@ window.VENTA = {
       corto: "QuadCast S",
       precioReferencia: null,
       imagen: "img/productos/mic.webp",
+      galeria: ["img/productos/mic-2.webp", "img/productos/mic-3.webp"],
       link: "https://row.hyperx.com/es/products/hyperx-quadcast-s-usb-microphone",
       destacado: "RGB + tap-to-mute",
       specs: [
@@ -253,6 +266,7 @@ window.VENTA = {
       corto: "1080p 60 fps",
       precioReferencia: null,
       imagen: "img/productos/cam.webp",
+      galeria: ["img/productos/cam-2.webp", "img/productos/cam-3.webp"],
       link: "https://www.logitech.com/es-ar/shop/p/streamcam.960-001280",
       destacado: "Full HD a 60 fps",
       specs: [

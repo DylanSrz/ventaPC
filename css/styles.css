@@ -294,7 +294,8 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .visual::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px); background-size: 20px 20px; }
 .visual__icon { position: relative; width: 44%; max-width: 120px; color: var(--cyan); filter: drop-shadow(0 0 14px rgba(0,229,255,.55)); }
 .visual img { position: absolute; inset: 8%; width: 84%; height: 84%; object-fit: contain; filter: drop-shadow(0 16px 24px rgba(0,0,0,.6)); }
-.visual.has-img { background: radial-gradient(circle at 50% 60%, rgba(124,92,255,.22), transparent 65%), #f1f2f7; }
+.visual.has-img { background: radial-gradient(circle at 50% 55%, #fff 35%, #e9e7f5 100%); }
+.visual.has-img img { filter: none; mix-blend-mode: multiply; }
 .visual.has-img::before, .visual.has-img .visual__icon { display: none; }
 .card:hover .visual img { transform: scale(1.05) translateZ(0); }
 .visual img { transition: transform .5s; }
@@ -419,7 +420,13 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 @keyframes pop { from { opacity: 0; transform: translateY(20px) scale(.96); } }
 .modal__close { position: sticky; top: 12px; float: right; margin: 12px 12px 0 0; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(0,0,0,.6); color: var(--text); cursor: pointer; font-size: 1rem; }
 .modal__body { display: grid; grid-template-columns: 1fr 1.1fr; }
-.modal__visual { min-height: 320px; }
+.modal__media { display: flex; flex-direction: column; background: #f4f3fa; }
+.modal__visual { min-height: 320px; flex: 1; }
+.thumbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 12px; border-top: 1px solid #dfe0e8; }
+.thumb { width: 64px; height: 64px; padding: 4px; border-radius: 10px; border: 2px solid transparent; background: #fff; cursor: pointer; transition: border-color .2s, transform .2s; }
+.thumb:hover { transform: translateY(-2px); }
+.thumb.on { border-color: var(--violet); }
+.thumb img { width: 100%; height: 100%; object-fit: contain; }
 .modal__info { padding: 28px; display: grid; gap: 16px; align-content: start; justify-items: start; }
 .modal__info h3 { font-size: 1.5rem; }
 .spec-table { width: 100%; border-collapse: collapse; font-size: .93rem; }
