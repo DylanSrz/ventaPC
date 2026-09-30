@@ -18,7 +18,7 @@ window.VENTA = {
     mensajeWhatsapp: "¡Hola! Vi tu PC gamer en la página y me interesa. ¿Sigue disponible?",
 
     // Precio al que vendes TODO el combo. null = aún no definido ("Consultar precio")
-    precioVenta: 10000000,
+    precioVenta: 9000000,
 
     // ¿Aceptas vender piezas por separado?
     ventaPorPartes: false,
@@ -34,7 +34,12 @@ window.VENTA = {
 
   // Fotos reales del equipo: pon los archivos en img/reales/ y agrégalos aquí.
   // Ej: { src: "img/reales/frontal.jpg", texto: "Vista frontal con RGB encendido" }
-  fotosReales: [],
+  fotosReales: [
+    { src: "img/reales/setup-1.webp", texto: "El setup completo en uso: 2 monitores, QuadCast S y la torre con RGB" },
+    { src: "img/reales/setup-2.webp", texto: "Monitor vertical y principal montados en el brazo doble" },
+    { src: "img/reales/setup-3.webp", texto: "Vista lateral con luz ambiente" },
+    { src: "img/reales/setup-4.webp", texto: "Teclado K619 y refrigeración líquida encendidos" },
+  ],
 
   componentes: [
     {
