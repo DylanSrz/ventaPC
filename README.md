@@ -3,7 +3,7 @@
 Landing page para vender mi PC gamer completo (torre + periféricos).
 Es HTML, CSS y JS puro, sin compilación: se publica directo en GitHub Pages.
 
-**URL:** https://dylansrz.github.io/ventapc/
+**URL:** https://dylansrz.github.io/ventaPC/
 
 ## Editar la información
 
@@ -39,7 +39,7 @@ El ahorro (valor y %) se calcula solo: suma de los precios de referencia menos e
 
 1. En GitHub: **Settings → Pages**.
 2. En *Source* elige **Deploy from a branch**, rama **main**, carpeta **/ (root)**.
-3. Espera 1–2 minutos y abre https://dylansrz.github.io/ventapc/
+3. Espera 1–2 minutos y abre https://dylansrz.github.io/ventaPC/
 
 ## Vista previa al compartir
 
