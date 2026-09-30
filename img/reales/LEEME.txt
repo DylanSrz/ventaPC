@@ -1,0 +1,1 @@
+Fotos reales del equipo. Agrégalas también en fotosReales dentro de js/data.js
