@@ -189,7 +189,7 @@
           <h3>${esc(titulo(c))}</h3>
           <ul class="card__specs">${c.specs.slice(0, 3).map(([k, v]) => `<li><span>${esc(k)}</span><b>${esc(v)}</b></li>`).join("")}</ul>
           <div class="card__foot">
-            <div class="card__price">${c.precioReferencia ? `<small>Referencia</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
+            <div class="card__price">${c.precioReferencia ? `<small>Referencia${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
             <div class="card__btns">
               <button class="btn btn--sm btn--ghost" type="button" data-open="${c.id}">Ficha</button>
               <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener" aria-label="Página oficial de ${esc(c.nombre)}">Oficial ↗</a>
@@ -256,7 +256,7 @@
         <table class="spec-table">${c.specs.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>
         ${c.video ? `<button class="yt" type="button" data-yt="${esc(c.video)}" style="background-image:url(https://i.ytimg.com/vi/${esc(c.video)}/hqdefault.jpg)"><span>▶</span><em>Ver video del producto</em></button>` : ""}
         <div class="modal__foot">
-          <div class="card__price">${c.precioReferencia ? `<small>Precio de referencia</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
+          <div class="card__price">${c.precioReferencia ? `<small>Precio de referencia (nuevo)${c.cantidad > 1 ? ` · ${c.cantidad} × ${fmt(c.precioReferencia)}` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}${c.fuentePrecio ? `<span class="price-src">Fuente: ${esc(c.fuentePrecio)}</span>` : ""}</div>
           <div class="card__btns">
             <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener">Página oficial ↗</a>
             ${waValido ? `<a class="btn btn--sm btn--wa" href="${waLink(`(Pregunta sobre: ${c.nombre})`)}" target="_blank" rel="noopener">Preguntar</a>` : ""}
@@ -336,17 +336,18 @@
         ? `${ahorro ? `<div class="receipt__tot receipt__tot--save"><span>Descuento</span><b>−${fmt(ahorro)}</b></div>` : ""}
            <div class="receipt__tot receipt__tot--big"><span>Total a pagar</span><b>${fmt(precio)}</b></div>`
         : `<div class="receipt__tot receipt__tot--big"><span>Precio de venta</span><b>Consultar</b></div>`}
+      ${C.notaPrecios ? `<p class="receipt__note">* ${esc(C.notaPrecios)}</p>` : ""}
       <div class="barcode">${barcode}</div>
     </div>`;
 
   const incluidos = todos.filter((c) => !c.precioReferencia).map((c) => c.categoria.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " y $1");
   $("#deal").innerHTML = precio
     ? `<div class="ring reveal" style="--pct:${ahorroPct}"><div><strong>${ahorroPct}%</strong><span>de ahorro</span></div></div>
-       <p>Solo las piezas con precio de referencia ya suman <b>${fmt(totalRef)}</b>. Te llevas todo, armado y listo, por <b class="grad">${fmt(precio)}</b>.</p>
+       <p>${incluidos ? "Solo las piezas con precio de referencia ya suman" : "Comprar todo esto nuevo hoy en Colombia cuesta"} <b>${fmt(totalRef)}</b>. Te llevas todo, armado y listo, por <b class="grad">${fmt(precio)}</b>.</p>
        ${incluidos ? `<p class="muted small">Además van incluidos sin costo adicional: ${esc(incluidos)}.</p>` : ""}
        <a class="btn btn--wa js-wa-deal" href="${waValido ? waLink() : "#contacto"}" ${waValido ? 'target="_blank" rel="noopener"' : ""}>Lo quiero</a>`
     : `<div class="ring ring--idle reveal" style="--pct:100"><div><strong>${D.componentes.length + D.perifericos.length}</strong><span>piezas</span></div></div>
-       <p>Las piezas con precio de referencia suman <b>${fmt(totalRef)}</b>.</p>
+       <p>${incluidos ? "Las piezas con precio de referencia suman" : "Comprar todo esto nuevo hoy en Colombia cuesta"} <b>${fmt(totalRef)}</b>.</p>
        ${incluidos ? `<p class="muted small">Además van incluidos: ${esc(incluidos)}.</p>` : ""}
        <a class="btn btn--wa" href="${waValido ? waLink() : "#contacto"}" ${waValido ? 'target="_blank" rel="noopener"' : ""}>Consultar precio</a>`;
 
