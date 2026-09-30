@@ -6,21 +6,22 @@
  *  - Imágenes: pon el archivo en img/productos/ con el nombre indicado
  *    en "imagen". Si no existe, se muestra un ícono en su lugar.
  *  - Para marcar algo como vendido: vendido: true
+ *  - cantidad: 2 multiplica el precio de referencia (ej. dos monitores)
  */
 window.VENTA = {
   config: {
     // Número con indicativo de país, sin "+" ni espacios. Ej: 573001234567
-    whatsapp: "57XXXXXXXXXX",
+    whatsapp: "573207131117",
     mensajeWhatsapp: "¡Hola! Vi tu PC gamer en la página y me interesa. ¿Sigue disponible?",
 
     // Precio al que vendes TODO el combo. null = aún no definido ("Consultar precio")
-    precioVenta: null,
+    precioVenta: 10000000,
 
     // ¿Aceptas vender piezas por separado?
     ventaPorPartes: false,
 
-    ubicacion: "Colombia",       // Ej: "Bogotá, Colombia"
-    entrega: null,               // Ej: "Entrega en persona en Bogotá · Envíos a todo el país"
+    ubicacion: "Barranquilla, Colombia",
+    entrega: "Entrega presencial en Barranquilla",
     estado: "2 años de uso",
     garantia: "Sin garantía vigente",
     moneda: "COP",
@@ -156,19 +157,40 @@ window.VENTA = {
         ["Formato", "M.2 2280"],
       ],
     },
+    {
+      id: "gabinete",
+      categoria: "Gabinete",
+      nombre: "Cooler Master MasterBox TD500 Mesh V2",
+      corto: "TD500 Mesh V2",
+      precioReferencia: null,
+      imagen: "img/productos/gabinete.webp",
+      link: "https://www.coolermaster.com/es-global/products/masterbox-td500-mesh-v2.html",
+      destacado: "3 ventiladores ARGB",
+      specs: [
+        ["Formato", "Media torre ATX (E-ATX hasta 12\" × 10.7\")"],
+        ["Ventiladores", "3 × SickleFlow 120 ARGB (hasta 7)"],
+        ["Frente", "Malla poligonal de alto flujo de aire"],
+        ["Lateral", "Vidrio templado"],
+        ["GPU", "Hasta 410 mm de largo"],
+        ["Radiadores", "Hasta 360 mm al frente y arriba"],
+        ["Puertos", "USB 3.2 Gen 2 Type-C en el panel frontal"],
+      ],
+    },
   ],
 
   perifericos: [
     {
       id: "monitor",
-      categoria: "Monitor",
+      categoria: "Monitores",
       nombre: "LG UltraGear 24GQ50F-B",
-      corto: "24\" 165 Hz",
+      cantidad: 2,
+      corto: "2× 24\" 165 Hz",
       precioReferencia: null,
       imagen: "img/productos/monitor.webp",
       link: "https://www.lg.com/es/monitores/monitores-ultragear-gaming/24gq50f-b/",
-      destacado: "165 Hz · 1 ms",
+      destacado: "Doble pantalla · 165 Hz",
       specs: [
+        ["Unidades", "2 monitores"],
         ["Pantalla", "24\" Full HD (1920 × 1080) VA"],
         ["Frecuencia", "165 Hz"],
         ["Respuesta", "1 ms (MBR)"],
@@ -194,17 +216,18 @@ window.VENTA = {
     {
       id: "teclado",
       categoria: "Teclado",
-      nombre: "Redragon Horus Low Profile",
+      nombre: "Redragon Horus K619",
       corto: "Mecánico low profile",
       precioReferencia: null,
       imagen: "img/productos/teclado.webp",
       link: "https://redragon.es/products/best-seller/teclado-low-profile-horus-tkl-fullsize-60/",
       destacado: "Switches rojos low profile",
       specs: [
-        ["Tipo", "Mecánico ultradelgado"],
-        ["Switches", "Red lineales de perfil bajo"],
-        ["Iluminación", "RGB"],
-        ["Extras", "Controles multimedia dedicados"],
+        ["Formato", "Completo (100 %) · 104 teclas"],
+        ["Switches", "Red lineales de perfil bajo (40 g)"],
+        ["Construcción", "Ultradelgado con placa de aluminio"],
+        ["Conexión", "Cableado USB-C"],
+        ["Iluminación", "RGB · controles multimedia dedicados"],
       ],
     },
     {
@@ -256,7 +279,7 @@ window.VENTA = {
   ],
 
   usos: [
-    { titulo: "Gaming 1080p alto refresco", texto: "Aprovecha los 165 Hz del monitor en shooters competitivos." },
+    { titulo: "Gaming 1080p alto refresco", texto: "Aprovecha los 165 Hz en shooters competitivos, con una segunda pantalla para Discord o stream." },
     { titulo: "Streaming", texto: "Codificador NVENC, QuadCast S y StreamCam: todo listo para transmitir." },
     { titulo: "Edición de video y foto", texto: "32 GB DDR5 y SSD de 7450 MB/s para proyectos pesados." },
     { titulo: "Programación y multitarea", texto: "10 núcleos / 16 hilos para compilar, virtualizar y más." },

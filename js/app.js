@@ -10,10 +10,12 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   const todos = [...D.componentes, ...D.perifericos];
-  const totalRef = todos.reduce((s, c) => s + (c.precioReferencia || 0), 0);
+  const ref = (c) => (c.precioReferencia || 0) * (c.cantidad || 1);
+  const titulo = (c) => (c.cantidad > 1 ? `${c.cantidad}× ` : "") + c.nombre;
+  const totalRef = todos.reduce((s, c) => s + ref(c), 0);
   const precio = C.precioVenta;
-  const ahorro = precio ? totalRef - precio : 0;
-  const ahorroPct = precio ? Math.round((ahorro / totalRef) * 100) : 0;
+  const ahorro = precio ? Math.max(0, totalRef - precio) : 0;
+  const ahorroPct = precio && totalRef ? Math.round((ahorro / totalRef) * 100) : 0;
 
   /* ---------- Toast ---------- */
   const toast = (msg) => {
@@ -48,7 +50,7 @@
          <span class="price__label">Precio del combo completo</span>
          <strong class="price__big">${fmt(precio)}</strong>
          <span class="price__ref">Valor en piezas: <s>${fmt(totalRef)}</s></span>
-         <span class="save-chip">Ahorras ${fmt(ahorro)} · ${ahorroPct}%</span>
+         ${ahorro ? `<span class="save-chip">Ahorras ${fmt(ahorro)} · ${ahorroPct}%</span>` : ""}
        </div>`
     : `<div class="price">
          <span class="price__label">Valor de referencia de las piezas</span>
@@ -159,7 +161,7 @@
     { n: 8, suf: " GB", label: "VRAM GDDR6", sub: "RTX 4060" },
     { n: 32, suf: " GB", label: "RAM DDR5", sub: "6000 MHz" },
     { n: 7450, suf: "", label: "MB/s lectura", sub: "Samsung 990 PRO" },
-    { n: 165, suf: " Hz", label: "Monitor", sub: "LG UltraGear" },
+    { n: 165, suf: " Hz", label: "2 monitores", sub: "LG UltraGear 24\"" },
   ];
   $("#stats").innerHTML = stats
     .map((s) => `<div class="stat reveal"><strong data-count="${s.n}" data-suf="${s.suf}">0${s.suf}</strong><span>${s.label}</span><small>${s.sub}</small></div>`)
@@ -184,10 +186,10 @@
         ${visual(c, "card__visual")}
         <div class="card__body">
           <div class="card__tags"><span class="tag">${esc(c.categoria)}</span>${c.destacado ? `<span class="tag tag--hl">${esc(c.destacado)}</span>` : ""}</div>
-          <h3>${esc(c.nombre)}</h3>
+          <h3>${esc(titulo(c))}</h3>
           <ul class="card__specs">${c.specs.slice(0, 3).map(([k, v]) => `<li><span>${esc(k)}</span><b>${esc(v)}</b></li>`).join("")}</ul>
           <div class="card__foot">
-            <div class="card__price">${c.precioReferencia ? `<small>Referencia</small>${fmt(c.precioReferencia)}` : `<small>Incluido</small>en el combo`}</div>
+            <div class="card__price">${c.precioReferencia ? `<small>Referencia</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
             <div class="card__btns">
               <button class="btn btn--sm btn--ghost" type="button" data-open="${c.id}">Ficha</button>
               <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener" aria-label="Página oficial de ${esc(c.nombre)}">Oficial ↗</a>
@@ -246,11 +248,11 @@
       ${visual(c, "modal__visual")}
       <div class="modal__info">
         <span class="tag">${esc(c.categoria)}</span>
-        <h3>${esc(c.nombre)}</h3>
+        <h3>${esc(titulo(c))}</h3>
         <table class="spec-table">${c.specs.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>
         ${c.video ? `<button class="yt" type="button" data-yt="${esc(c.video)}" style="background-image:url(https://i.ytimg.com/vi/${esc(c.video)}/hqdefault.jpg)"><span>▶</span><em>Ver video del producto</em></button>` : ""}
         <div class="modal__foot">
-          <div class="card__price">${c.precioReferencia ? `<small>Precio de referencia</small>${fmt(c.precioReferencia)}` : `<small>Incluido</small>en el combo`}</div>
+          <div class="card__price">${c.precioReferencia ? `<small>Precio de referencia</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
           <div class="card__btns">
             <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener">Página oficial ↗</a>
             ${waValido ? `<a class="btn btn--sm btn--wa" href="${waLink(`(Pregunta sobre: ${c.nombre})`)}" target="_blank" rel="noopener">Preguntar</a>` : ""}
@@ -310,7 +312,7 @@
 
   /* ---------- Recibo de precio ---------- */
   const linea = (c) =>
-    `<li class="${c.vendido ? "is-sold" : ""}"><span>${esc(c.nombre)}</span><i></i><b>${c.precioReferencia ? fmt(c.precioReferencia) : "Incluido"}</b></li>`;
+    `<li class="${c.vendido ? "is-sold" : ""}"><span>${esc(titulo(c))}</span><i></i><b>${c.precioReferencia ? fmt(ref(c)) : "Incluido"}</b></li>`;
   const barcode = Array.from({ length: 48 }, (_, i) => `<i style="width:${1 + ((i * 7) % 4)}px"></i>`).join("");
   $("#receipt").innerHTML = `
     <div class="receipt__paper">
@@ -321,19 +323,21 @@
       <ul>${D.perifericos.map(linea).join("")}</ul>
       <div class="receipt__tot"><span>Valor de referencia</span><b class="${precio ? "strike" : ""}">${fmt(totalRef)}</b></div>
       ${precio
-        ? `<div class="receipt__tot receipt__tot--save"><span>Descuento</span><b>−${fmt(ahorro)}</b></div>
+        ? `${ahorro ? `<div class="receipt__tot receipt__tot--save"><span>Descuento</span><b>−${fmt(ahorro)}</b></div>` : ""}
            <div class="receipt__tot receipt__tot--big"><span>Total a pagar</span><b>${fmt(precio)}</b></div>`
         : `<div class="receipt__tot receipt__tot--big"><span>Precio de venta</span><b>Consultar</b></div>`}
       <div class="barcode">${barcode}</div>
     </div>`;
 
+  const incluidos = todos.filter((c) => !c.precioReferencia).map((c) => c.categoria.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " y $1");
   $("#deal").innerHTML = precio
     ? `<div class="ring reveal" style="--pct:${ahorroPct}"><div><strong>${ahorroPct}%</strong><span>de ahorro</span></div></div>
-       <p>Comprar estas mismas piezas por separado cuesta <b>${fmt(totalRef)}</b>. Te llevas todo, armado y listo, por <b class="grad">${fmt(precio)}</b>.</p>
-       <p class="muted small">Los periféricos van incluidos sin costo adicional.</p>
+       <p>Solo las piezas con precio de referencia ya suman <b>${fmt(totalRef)}</b>. Te llevas todo, armado y listo, por <b class="grad">${fmt(precio)}</b>.</p>
+       ${incluidos ? `<p class="muted small">Además van incluidos sin costo adicional: ${esc(incluidos)}.</p>` : ""}
        <a class="btn btn--wa js-wa-deal" href="${waValido ? waLink() : "#contacto"}" ${waValido ? 'target="_blank" rel="noopener"' : ""}>Lo quiero</a>`
     : `<div class="ring ring--idle reveal" style="--pct:100"><div><strong>${D.componentes.length + D.perifericos.length}</strong><span>piezas</span></div></div>
-       <p>La suma de las piezas de la torre a precio de referencia es <b>${fmt(totalRef)}</b>, y los periféricos van incluidos.</p>
+       <p>Las piezas con precio de referencia suman <b>${fmt(totalRef)}</b>.</p>
+       ${incluidos ? `<p class="muted small">Además van incluidos: ${esc(incluidos)}.</p>` : ""}
        <a class="btn btn--wa" href="${waValido ? waLink() : "#contacto"}" ${waValido ? 'target="_blank" rel="noopener"' : ""}>Consultar precio</a>`;
 
   /* ---------- Datos de la venta ---------- */

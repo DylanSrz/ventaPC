@@ -24,7 +24,7 @@ El ahorro (valor y %) se calcula solo: suma de los precios de referencia menos e
 ## Imágenes
 
 - **Productos (imágenes oficiales):** en `img/productos/` con estos nombres:
-  `gpu`, `cpu`, `mobo`, `ram`, `cooler`, `psu`, `ssd`, `monitor`, `soporte`, `teclado`, `mic`, `cam`
+  `gpu`, `cpu`, `mobo`, `ram`, `cooler`, `psu`, `ssd`, `gabinete`, `monitor`, `soporte`, `teclado`, `mic`, `cam`
   (extensión `.webp`; si usas `.png` o `.jpg`, cambia la ruta en `data.js`).
   Si falta alguna, la página muestra un ícono en su lugar.
 - **Fotos reales:** súbelas a `img/reales/` y agrégalas en `fotosReales` dentro de `data.js`:

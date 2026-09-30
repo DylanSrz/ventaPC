@@ -1,1 +1,1 @@
-Imágenes oficiales de cada producto: gpu, cpu, mobo, ram, cooler, psu, ssd, monitor, soporte, teclado, mic, cam (.webp)
+Imágenes oficiales de cada producto: gpu, cpu, mobo, ram, cooler, psu, ssd, gabinete, monitor, soporte, teclado, mic, cam (.webp)
