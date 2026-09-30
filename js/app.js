@@ -244,8 +244,12 @@
   const modal = $("#modal");
   const openModal = (c) => {
     if (!c) return;
+    const fotos = [c.imagen, ...(c.galeria || [])];
     $("#modalBody").innerHTML = `
-      ${visual(c, "modal__visual")}
+      <div class="modal__media">
+        ${visual(c, "modal__visual")}
+        ${fotos.length > 1 ? `<div class="thumbs">${fotos.map((f, i) => `<button class="thumb${i ? "" : " on"}" type="button" data-foto="${esc(f)}" aria-label="Ver foto ${i + 1}"><img src="${esc(f)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+      </div>
       <div class="modal__info">
         <span class="tag">${esc(c.categoria)}</span>
         <h3>${esc(titulo(c))}</h3>
@@ -263,6 +267,12 @@
   };
   modal.addEventListener("click", (e) => {
     if (e.target === modal || e.target.closest("[data-close]")) modal.close();
+    const th = e.target.closest("[data-foto]");
+    if (th) {
+      const img = modal.querySelector(".modal__visual img");
+      if (img) img.src = th.dataset.foto;
+      modal.querySelectorAll(".thumb").forEach((t) => t.classList.toggle("on", t === th));
+    }
     const yt = e.target.closest("[data-yt]");
     if (yt) {
       const f = document.createElement("iframe");
