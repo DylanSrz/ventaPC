@@ -430,9 +430,11 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 
 /* MODAL */
 .modal { width: min(920px, calc(100vw - 24px)); max-height: calc(100svh - 24px); padding: 0; border: 1px solid var(--line-2); border-radius: 22px; background: var(--bg-2); color: var(--text); overflow: auto; }
-.modal::backdrop { background: rgba(3,3,8,.7); backdrop-filter: blur(6px); }
-.modal[open] { animation: pop .35s cubic-bezier(.2,.9,.3,1.2); }
-@keyframes pop { from { opacity: 0; transform: translateY(20px) scale(.96); } }
+/* Entra (280ms) y sale (200ms) por el mismo camino, sin rebote; con transiciones para poder revertir a mitad */
+.modal { opacity: 0; transform: translateY(20px) scale(.97); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+.modal.is-open { opacity: 1; transform: none; transition-duration: 280ms; }
+.modal::backdrop { background: rgba(3,3,8,.7); backdrop-filter: blur(6px); opacity: 0; transition: opacity 200ms var(--ease-out); }
+.modal.is-open::backdrop { opacity: 1; transition-duration: 280ms; }
 .modal__close { position: sticky; top: 12px; float: right; margin: 12px 12px -50px 0; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(0,0,0,.6); color: var(--text); cursor: pointer; font-size: 1rem; transition: scale 160ms var(--ease-out); }
 .modal__close:active { scale: .94; transition-duration: 100ms; }
 .modal__body { display: grid; grid-template-columns: 1fr 1.1fr; }

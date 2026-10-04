@@ -247,6 +247,26 @@
 
   /* ---------- Modal ---------- */
   const modal = $("#modal");
+  let cierre = null;
+  const abrirModal = () => {
+    clearTimeout(cierre); // si se estaba cerrando, vuelve desde donde iba
+    if (!modal.open) { modal.showModal(); modal.offsetWidth; } // reflow: parte del estado cerrado
+    modal.classList.add("is-open");
+  };
+  const cerrarModal = () => {
+    if (!modal.open) return;
+    modal.classList.remove("is-open");
+    if (reduceMotion) return modal.close();
+    clearTimeout(cierre);
+    cierre = setTimeout(() => modal.close(), 260); // respaldo por si no llega transitionend
+  };
+  modal.addEventListener("transitionend", (e) => {
+    if (e.target === modal && e.propertyName === "opacity" && !modal.classList.contains("is-open")) {
+      clearTimeout(cierre);
+      modal.close();
+    }
+  });
+  modal.addEventListener("cancel", (e) => { e.preventDefault(); cerrarModal(); }); // tecla Escape
   const openModal = (c) => {
     if (!c) return;
     const fotos = [c.imagen, ...(c.galeria || [])];
@@ -268,14 +288,22 @@
           </div>
         </div>
       </div>`;
-    modal.showModal();
+    abrirModal();
   };
   modal.addEventListener("click", (e) => {
-    if (e.target === modal || e.target.closest("[data-close]")) modal.close();
+    if (e.target === modal || e.target.closest("[data-close]")) cerrarModal();
     const th = e.target.closest("[data-foto]");
     if (th) {
       const img = modal.querySelector(".modal__visual img");
-      if (img) img.src = th.dataset.foto;
+      if (img) {
+        // Carga la foto nueva antes de cambiarla y la funde, en vez de saltar de golpe
+        const nueva = new Image();
+        nueva.src = th.dataset.foto;
+        nueva.decode().catch(() => {}).then(() => {
+          img.src = nueva.src;
+          if (!reduceMotion) img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+        });
+      }
       modal.querySelectorAll(".thumb").forEach((t) => t.classList.toggle("on", t === th));
     }
     const yt = e.target.closest("[data-yt]");
@@ -289,7 +317,11 @@
       yt.replaceWith(f);
     }
   });
-  modal.addEventListener("close", () => ($("#modalBody").innerHTML = ""));
+  modal.addEventListener("close", () => {
+    clearTimeout(cierre);
+    modal.classList.remove("is-open");
+    $("#modalBody").innerHTML = "";
+  });
 
   /* ---------- Rendimiento ---------- */
   const escala = Math.max(...D.rendimiento.map((r) => r.fps), 200) * 1.05;
@@ -321,7 +353,7 @@
       if (!b) return;
       const f = D.fotosReales[+b.dataset.shot];
       $("#modalBody").innerHTML = `<figure class="modal__photo"><img src="${esc(f.src)}" alt="${esc(f.texto || "")}">${f.texto ? `<figcaption>${esc(f.texto)}</figcaption>` : ""}</figure>`;
-      modal.showModal();
+      abrirModal();
     });
   }
 
