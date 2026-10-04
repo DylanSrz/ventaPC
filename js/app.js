@@ -136,6 +136,9 @@
       const g = geo[i];
       n.el.style.transform = `translate(-50%,-50%) translate(${g.x * t}px, ${g.y * t}px) rotate(${n.spin * (1 - t)}deg) scale(${0.35 + 0.65 * t})`;
       n.el.style.opacity = clamp(t * 2.2);
+      // Mientras la pieza está oculta o saliendo no se puede tocar (si no, tapa al núcleo)
+      const listo = t >= 0.9;
+      if (n.el.inert === listo) n.el.inert = !listo;
       n.line.setAttribute("x1", g.cx);
       n.line.setAttribute("y1", g.cy);
       n.line.setAttribute("x2", g.cx + g.x * t);
