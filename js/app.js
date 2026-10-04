@@ -3,7 +3,9 @@
   const C = D.config;
   const ICON = window.ICONOS;
   const $ = (sel, root = document) => root.querySelector(sel);
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Movimiento reducido: se respeta en vivo (si la persona lo activa con la página abierta, también)
+  const movReducido = matchMedia("(prefers-reduced-motion: reduce)");
+  let reduceMotion = movReducido.matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => 1 - Math.pow(1 - t, 3);
   const EASE_OUT = getComputedStyle(document.documentElement).getPropertyValue("--ease-out").trim(); // misma curva que el CSS
@@ -65,8 +67,9 @@
 
   // Parallax de la torre
   const tower = $("#tower");
-  if (!reduceMotion && matchMedia("(pointer:fine)").matches) {
+  if (matchMedia("(pointer:fine)").matches) {
     addEventListener("pointermove", (e) => {
+      if (reduceMotion) return;
       const x = e.clientX / innerWidth - 0.5;
       const y = e.clientY / innerHeight - 0.5;
       tower.style.setProperty("--ty", `${-22 + x * 18}deg`);
@@ -101,7 +104,9 @@
   });
   const cpu = D.componentes.find((c) => c.id === "cpu");
   // Con movimiento reducido el build ya aparece desarmado: no hay nada que deslizar
-  if (reduceMotion) $("#build .eyebrow").textContent = "Toca una pieza para ver su ficha";
+  const etiquetaBuild = $("#build .eyebrow"), etiquetaOriginal = etiquetaBuild.textContent;
+  const ponerEtiqueta = () => (etiquetaBuild.textContent = reduceMotion ? "Toca una pieza para ver su ficha" : etiquetaOriginal);
+  ponerEtiqueta();
   $("#explodeCore").addEventListener("click", () => openModal(cpu));
 
   let geo = null;
@@ -220,11 +225,11 @@
     if (b) openModal(todos.find((c) => c.id === b.dataset.open));
   });
 
-  if (!reduceMotion) {
+  {
     document.querySelectorAll(".card").forEach((el) => {
       const inner = el.querySelector(".card__inner");
       el.addEventListener("pointermove", (e) => {
-        if (e.pointerType === "touch") return;
+        if (e.pointerType === "touch" || reduceMotion) return;
         const r = el.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
         inner.style.setProperty("--rx", `${(0.5 - y) * 14}deg`);
@@ -249,7 +254,7 @@
       document.querySelectorAll(".card").forEach((el) => ojo.observe(el));
       let giro = null;
       addEventListener("deviceorientation", (e) => {
-        if (e.gamma == null) return;
+        if (e.gamma == null || reduceMotion) return;
         const pendiente = giro;
         giro = { gx: clamp((e.gamma + 30) / 60), gy: clamp((e.beta - 20) / 60) };
         if (pendiente) return;
@@ -332,9 +337,11 @@
     // velocidad al soltar (px/ms), con lo que el dedo hizo en los últimos 100ms
     const [t1, y1] = muestras[0], [t2, y2] = muestras[muestras.length - 1];
     const velocidad = e.timeStamp - t1 < 100 && t2 > t1 ? (y2 - y1) / (t2 - t1) : 0;
+    const cierra = e.type === "pointerup" && dy > 24 && (dy > alto * 0.3 || velocidad > 0.11);
     modal.style.transition = "";
-    modal.style.transform = ""; // anima desde donde quedó el dedo
-    if (e.type === "pointerup" && dy > 24 && (dy > alto * 0.3 || velocidad > 0.11)) cerrarModal();
+    // anima desde donde quedó el dedo; con movimiento reducido se desvanece ahí mismo
+    if (!(cierra && reduceMotion)) modal.style.transform = "";
+    if (cierra) cerrarModal();
   };
   agarre.addEventListener("pointerup", soltar);
   agarre.addEventListener("pointercancel", soltar);
@@ -391,6 +398,7 @@
   });
   modal.addEventListener("close", () => {
     clearTimeout(cierre);
+    modal.style.transform = "";
     modal.classList.remove("is-open");
     $("#modalBody").innerHTML = "";
   });
@@ -501,9 +509,9 @@
 
   /* ---------- Botón flotante: una sola onda al llegar al precio ---------- */
   const waFloat = $(".wa-float"), precioSec = $("#precio");
-  if (!reduceMotion && waFloat && precioSec) {
+  if (waFloat && precioSec) {
     const avisa = new IntersectionObserver(([en]) => {
-      if (!en.isIntersecting) return;
+      if (!en.isIntersecting || reduceMotion) return;
       waFloat.classList.add("is-calling");
       avisa.disconnect();
     }, { threshold: 0.3 });
@@ -514,4 +522,20 @@
   const fuera = new IntersectionObserver((entries) =>
     entries.forEach((en) => en.target.classList.toggle("is-off", !en.isIntersecting)));
   document.querySelectorAll("main section").forEach((s) => fuera.observe(s));
+
+  /* ---------- Si cambia la preferencia de movimiento con la página abierta ---------- */
+  movReducido.addEventListener("change", () => {
+    reduceMotion = movReducido.matches;
+    ponerEtiqueta();
+    if (reduceMotion) {
+      // todo vuelve a su posición de reposo
+      ["--tx", "--ty"].forEach((p) => tower.style.removeProperty(p));
+      document.querySelectorAll(".card").forEach((el) => {
+        el.classList.remove("is-hover");
+        ["--gmx", "--gmy", "--grx", "--gry"].forEach((p) => el.style.removeProperty(p));
+        ["--rx", "--ry", "--mx", "--my"].forEach((p) => el.querySelector(".card__inner").style.removeProperty(p));
+      });
+    }
+    requestAnimationFrame(() => { layout(); renderExplode(); }); // el build cambia de alto
+  });
 })();

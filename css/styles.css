@@ -537,6 +537,10 @@ html:has(.modal[open]) { overflow: hidden; } /* la página de atrás no se mueve
   .explode__sticky { position: relative; top: auto; }
   .explode__progress { display: none; }
   html { scroll-behavior: auto; }
+  .nav::after { transition: opacity .2s ease !important; } /* la sombra de la barra se funde, no salta */
+  /* Al pasar el mouse nada se levanta ni se agranda (solo cambian colores y bordes) */
+  .btn:hover, .thumb:hover { transform: none; }
+  .card:hover .visual img, .shot:hover img { transform: none; }
 }
 
 /* Transparencia reducida: superficies sólidas, sin desenfoque */
