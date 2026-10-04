@@ -10,5 +10,6 @@
 | 006 | [Barra superior ligera: vidrio esmerilado y línea solo al bajar](006-barra-superior-ligera.md) | LOW | DONE |
 | 007 | [Menos movimiento constante y pausa fuera de pantalla](007-menos-movimiento-constante.md) | MEDIUM | DONE |
 | 008 | [Movimiento reducido con fundidos y transparencia reducida sólida](008-movimiento-reducido-suave.md) | MEDIUM | DONE |
+| 009 | [Una sola curva y tiempos con nombre](009-curvas-y-tiempos-unificados.md) | LOW | DONE |
 
 Orden recomendado: 001 primero (define el token `--ease-out` que usarán los planes siguientes).

@@ -6,6 +6,7 @@
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => 1 - Math.pow(1 - t, 3);
+  const EASE_OUT = getComputedStyle(document.documentElement).getPropertyValue("--ease-out").trim(); // misma curva que el CSS
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   // iOS solo aplica :active (la respuesta al tocar) si la página escucha toques
   document.addEventListener("touchstart", () => {}, { passive: true });
@@ -321,7 +322,7 @@
         nueva.src = th.dataset.foto;
         nueva.decode().catch(() => {}).then(() => {
           img.src = nueva.src;
-          img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+          img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: EASE_OUT });
         });
       }
       modal.querySelectorAll(".thumb").forEach((t) => t.classList.toggle("on", t === th));
