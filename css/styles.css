@@ -40,6 +40,10 @@ body {
 img { max-width: 100%; display: block; }
 a { color: inherit; }
 a, button { -webkit-tap-highlight-color: transparent; }
+/* Controles: el toque responde sin esperar el doble toque, y mantener el dedo no selecciona su texto */
+a, button { touch-action: manipulation; }
+button, .btn, .nav__links a, .nav__brand { user-select: none; -webkit-user-select: none; }
+.btn, .wa-float, .nav__links a, .nav__brand, .node, .modal__close { -webkit-touch-callout: none; }
 h1, h2, h3, h4 { line-height: 1.08; margin: 0; letter-spacing: -0.02em; }
 h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .mono { font-family: var(--mono); }
@@ -105,6 +109,8 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .nav__links { display: flex; gap: 28px; }
 .nav__links a { color: var(--muted); text-decoration: none; font-weight: 500; transition: color .2s; }
 @media (hover: hover) and (pointer: fine) { .nav__links a:hover { color: var(--text); } }
+/* Enlaces de texto: se atenúan al instante al tocarlos, como los botones de texto de iOS (sin animación: se usan seguido) */
+.nav__links a:active, .nav__brand:active { opacity: .55; }
 @media (max-width: 760px) { .nav__links { display: none; } }
 
 .eyebrow {
