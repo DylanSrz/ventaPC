@@ -7,6 +7,8 @@
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => 1 - Math.pow(1 - t, 3);
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
+  // iOS solo aplica :active (la respuesta al tocar) si la página escucha toques
+  document.addEventListener("touchstart", () => {}, { passive: true });
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   const todos = [...D.componentes, ...D.perifericos];
