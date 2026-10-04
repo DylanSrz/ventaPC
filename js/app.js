@@ -3,9 +3,12 @@
   const C = D.config;
   const ICON = window.ICONOS;
   const $ = (sel, root = document) => root.querySelector(sel);
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Movimiento reducido: se respeta en vivo (si la persona lo activa con la página abierta, también)
+  const movReducido = matchMedia("(prefers-reduced-motion: reduce)");
+  let reduceMotion = movReducido.matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => 1 - Math.pow(1 - t, 3);
+  const EASE_OUT = getComputedStyle(document.documentElement).getPropertyValue("--ease-out").trim(); // misma curva que el CSS
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   // iOS solo aplica :active (la respuesta al tocar) si la página escucha toques
   document.addEventListener("touchstart", () => {}, { passive: true });
@@ -64,8 +67,9 @@
 
   // Parallax de la torre
   const tower = $("#tower");
-  if (!reduceMotion && matchMedia("(pointer:fine)").matches) {
+  if (matchMedia("(pointer:fine)").matches) {
     addEventListener("pointermove", (e) => {
+      if (reduceMotion) return;
       const x = e.clientX / innerWidth - 0.5;
       const y = e.clientY / innerHeight - 0.5;
       tower.style.setProperty("--ty", `${-22 + x * 18}deg`);
@@ -99,6 +103,10 @@
     return { el: n, line, spin: (i % 2 ? 1 : -1) * (20 + i * 9) };
   });
   const cpu = D.componentes.find((c) => c.id === "cpu");
+  // Con movimiento reducido el build ya aparece desarmado: no hay nada que deslizar
+  const etiquetaBuild = $("#build .eyebrow"), etiquetaOriginal = etiquetaBuild.textContent;
+  const ponerEtiqueta = () => (etiquetaBuild.textContent = reduceMotion ? "Toca una pieza para ver su ficha" : etiquetaOriginal);
+  ponerEtiqueta();
   $("#explodeCore").addEventListener("click", () => openModal(cpu));
 
   let geo = null;
@@ -136,6 +144,9 @@
       const g = geo[i];
       n.el.style.transform = `translate(-50%,-50%) translate(${g.x * t}px, ${g.y * t}px) rotate(${n.spin * (1 - t)}deg) scale(${0.35 + 0.65 * t})`;
       n.el.style.opacity = clamp(t * 2.2);
+      // Mientras la pieza está oculta o saliendo no se puede tocar (si no, tapa al núcleo)
+      const listo = t >= 0.9;
+      if (n.el.inert === listo) n.el.inert = !listo;
       n.line.setAttribute("x1", g.cx);
       n.line.setAttribute("y1", g.cy);
       n.line.setAttribute("x2", g.cx + g.x * t);
@@ -151,6 +162,11 @@
     requestAnimationFrame(() => { renderExplode(); ticking = false; });
   };
   addEventListener("scroll", onScroll, { passive: true });
+  // Barra superior: la línea de abajo solo aparece cuando hay contenido pasando por detrás
+  const nav = $(".nav");
+  const marcaNav = () => nav.classList.toggle("is-scrolled", scrollY > 2);
+  addEventListener("scroll", marcaNav, { passive: true });
+  marcaNav();
   addEventListener("resize", () => { layout(); renderExplode(); });
   if (document.fonts) document.fonts.ready.then(() => { layout(); renderExplode(); });
   layout();
@@ -182,7 +198,7 @@
 
   /* ---------- Tarjetas holográficas ---------- */
   const card = (c, i) => `
-    <article class="card reveal ${c.vendido ? "is-sold" : ""}" style="--d:${i * 60}ms" data-id="${c.id}">
+    <article class="card reveal ${c.vendido ? "is-sold" : ""}" data-id="${c.id}">
       <div class="card__inner">
         <div class="card__holo"></div>
         ${visual(c, "card__visual")}
@@ -209,11 +225,11 @@
     if (b) openModal(todos.find((c) => c.id === b.dataset.open));
   });
 
-  if (!reduceMotion) {
+  {
     document.querySelectorAll(".card").forEach((el) => {
       const inner = el.querySelector(".card__inner");
       el.addEventListener("pointermove", (e) => {
-        if (e.pointerType === "touch") return;
+        if (e.pointerType === "touch" || reduceMotion) return;
         const r = el.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
         inner.style.setProperty("--rx", `${(0.5 - y) * 14}deg`);
@@ -230,20 +246,106 @@
 
     // En celular: el brillo holográfico sigue la inclinación del teléfono
     if (matchMedia("(pointer:coarse)").matches && "DeviceOrientationEvent" in window) {
+      // Solo se actualizan las tarjetas que están en pantalla, una vez por cuadro
+      // (antes se recalculaba toda la página en cada movimiento del teléfono)
+      const visibles = new Set();
+      const ojo = new IntersectionObserver((entries) =>
+        entries.forEach((en) => (en.isIntersecting ? visibles.add(en.target) : visibles.delete(en.target))));
+      document.querySelectorAll(".card").forEach((el) => ojo.observe(el));
+      let giro = null;
       addEventListener("deviceorientation", (e) => {
-        if (e.gamma == null) return;
-        const gx = clamp((e.gamma + 30) / 60), gy = clamp((e.beta - 20) / 60);
-        const root = document.documentElement.style;
-        root.setProperty("--gmx", `${gx * 100}%`);
-        root.setProperty("--gmy", `${gy * 100}%`);
-        root.setProperty("--grx", `${(0.5 - gy) * 8}deg`);
-        root.setProperty("--gry", `${(gx - 0.5) * 10}deg`);
+        if (e.gamma == null || reduceMotion) return;
+        const pendiente = giro;
+        giro = { gx: clamp((e.gamma + 30) / 60), gy: clamp((e.beta - 20) / 60) };
+        if (pendiente) return;
+        requestAnimationFrame(() => {
+          const { gx, gy } = giro;
+          giro = null;
+          visibles.forEach((el) => {
+            el.style.setProperty("--gmx", `${gx * 100}%`);
+            el.style.setProperty("--gmy", `${gy * 100}%`);
+            el.style.setProperty("--grx", `${(0.5 - gy) * 8}deg`);
+            el.style.setProperty("--gry", `${(gx - 0.5) * 10}deg`);
+          });
+        });
       });
     }
   }
 
   /* ---------- Modal ---------- */
   const modal = $("#modal");
+  const enHoja = matchMedia("(max-width: 720px)"); // en celular la ficha es una hoja que sube desde abajo
+  let cierre = null;
+  // Recuerda dónde se tocó por última vez, para que la ficha nazca desde ahí
+  let toque = null;
+  addEventListener("pointerdown", (e) => (toque = { x: e.clientX, y: e.clientY, t: e.timeStamp }), { capture: true, passive: true });
+  const origenDesde = () => {
+    if (enHoja.matches) return;
+    const reciente = toque && performance.now() - toque.t < 1500;
+    const f = document.activeElement;
+    let p = reciente ? toque : null;
+    if (!p && f && f !== document.body) { const r = f.getBoundingClientRect(); p = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+    if (!p) { modal.style.transformOrigin = ""; return; }
+    modal.style.transition = "none";
+    modal.style.transform = "none"; // mide la ficha en su lugar final
+    const r = modal.getBoundingClientRect();
+    modal.style.transformOrigin = `${p.x - r.left}px ${p.y - r.top}px`;
+    modal.style.transform = "";
+    modal.offsetWidth;
+    modal.style.transition = "";
+  };
+  const abrirModal = () => {
+    clearTimeout(cierre); // si se estaba cerrando, vuelve desde donde iba
+    if (!modal.open) { modal.showModal(); modal.scrollTop = 0; origenDesde(); modal.offsetWidth; } // reflow: parte del estado cerrado
+    modal.classList.add("is-open");
+  };
+  const cerrarModal = () => {
+    if (!modal.open) return;
+    modal.classList.remove("is-open");
+    clearTimeout(cierre);
+    cierre = setTimeout(() => modal.close(), 450); // respaldo por si no llega transitionend
+  };
+  modal.addEventListener("transitionend", (e) => {
+    if (e.target === modal && (e.propertyName === "opacity" || e.propertyName === "transform") && !modal.classList.contains("is-open")) {
+      clearTimeout(cierre);
+      modal.close();
+    }
+  });
+
+  // Arrastrar la hoja hacia abajo para cerrarla (celular). Sigue al dedo 1:1;
+  // hacia arriba resiste cada vez más; un tirón rápido basta para cerrarla.
+  const agarre = $(".modal__grab");
+  let arrastre = null;
+  const resistencia = (o, d) => (o * d * 0.55) / (d + 0.55 * Math.abs(o));
+  agarre.addEventListener("pointerdown", (e) => {
+    if (!enHoja.matches) return;
+    agarre.setPointerCapture(e.pointerId);
+    arrastre = { y0: e.clientY, dy: 0, alto: modal.offsetHeight, muestras: [[e.timeStamp, 0]] };
+    modal.style.transition = "none";
+  });
+  agarre.addEventListener("pointermove", (e) => {
+    if (!arrastre) return;
+    const dy = e.clientY - arrastre.y0;
+    arrastre.dy = dy;
+    arrastre.muestras = [...arrastre.muestras.filter(([t]) => e.timeStamp - t < 100), [e.timeStamp, dy]]; // últimos 100ms
+    modal.style.transform = `translateY(${dy > 0 ? dy : resistencia(dy, arrastre.alto)}px)`;
+  });
+  const soltar = (e) => {
+    if (!arrastre) return;
+    const { dy, alto, muestras } = arrastre;
+    arrastre = null;
+    // velocidad al soltar (px/ms), con lo que el dedo hizo en los últimos 100ms
+    const [t1, y1] = muestras[0], [t2, y2] = muestras[muestras.length - 1];
+    const velocidad = e.timeStamp - t1 < 100 && t2 > t1 ? (y2 - y1) / (t2 - t1) : 0;
+    const cierra = e.type === "pointerup" && dy > 24 && (dy > alto * 0.3 || velocidad > 0.11);
+    modal.style.transition = "";
+    // anima desde donde quedó el dedo; con movimiento reducido se desvanece ahí mismo
+    if (!(cierra && reduceMotion)) modal.style.transform = "";
+    if (cierra) cerrarModal();
+  };
+  agarre.addEventListener("pointerup", soltar);
+  agarre.addEventListener("pointercancel", soltar);
+  modal.addEventListener("cancel", (e) => { e.preventDefault(); cerrarModal(); }); // tecla Escape
   const openModal = (c) => {
     if (!c) return;
     const fotos = [c.imagen, ...(c.galeria || [])];
@@ -265,14 +367,22 @@
           </div>
         </div>
       </div>`;
-    modal.showModal();
+    abrirModal();
   };
   modal.addEventListener("click", (e) => {
-    if (e.target === modal || e.target.closest("[data-close]")) modal.close();
+    if (e.target === modal || e.target.closest("[data-close]")) cerrarModal();
     const th = e.target.closest("[data-foto]");
     if (th) {
       const img = modal.querySelector(".modal__visual img");
-      if (img) img.src = th.dataset.foto;
+      if (img) {
+        // Carga la foto nueva antes de cambiarla y la funde, en vez de saltar de golpe
+        const nueva = new Image();
+        nueva.src = th.dataset.foto;
+        nueva.decode().catch(() => {}).then(() => {
+          img.src = nueva.src;
+          img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: EASE_OUT });
+        });
+      }
       modal.querySelectorAll(".thumb").forEach((t) => t.classList.toggle("on", t === th));
     }
     const yt = e.target.closest("[data-yt]");
@@ -286,7 +396,12 @@
       yt.replaceWith(f);
     }
   });
-  modal.addEventListener("close", () => ($("#modalBody").innerHTML = ""));
+  modal.addEventListener("close", () => {
+    clearTimeout(cierre);
+    modal.style.transform = "";
+    modal.classList.remove("is-open");
+    $("#modalBody").innerHTML = "";
+  });
 
   /* ---------- Rendimiento ---------- */
   const escala = Math.max(...D.rendimiento.map((r) => r.fps), 200) * 1.05;
@@ -296,7 +411,7 @@
     D.rendimiento
       .map((r, i) => {
         const tier = r.fps >= hz ? "top" : r.fps >= 90 ? "mid" : "ok";
-        return `<div class="bar reveal" style="--d:${i * 70}ms">
+        return `<div class="bar reveal">
           <div class="bar__label"><strong>${esc(r.juego)}</strong><small>${esc(r.ajustes)}</small></div>
           <div class="bar__track"><i class="bar__fill bar__fill--${tier}" style="--w:${(r.fps / escala) * 100}%"></i></div>
           <span class="bar__val mono">~${r.fps}<small> fps</small></span>
@@ -304,21 +419,21 @@
       })
       .join("");
   $("#perfUses").innerHTML = D.usos
-    .map((u, i) => `<div class="use reveal" style="--d:${i * 80}ms"><h4>${esc(u.titulo)}</h4><p>${esc(u.texto)}</p></div>`)
+    .map((u, i) => `<div class="use reveal"><h4>${esc(u.titulo)}</h4><p>${esc(u.texto)}</p></div>`)
     .join("");
 
   /* ---------- Fotos reales ---------- */
   if (D.fotosReales.length) {
     $("#fotos").hidden = false;
     $("#gallery").innerHTML = D.fotosReales
-      .map((f, i) => `<button class="shot reveal" type="button" data-shot="${i}" style="--d:${i * 60}ms"><img src="${esc(f.src)}" alt="${esc(f.texto || "Foto real del equipo")}" loading="lazy">${f.texto ? `<span>${esc(f.texto)}</span>` : ""}</button>`)
+      .map((f, i) => `<button class="shot reveal" type="button" data-shot="${i}"><img src="${esc(f.src)}" alt="${esc(f.texto || "Foto real del equipo")}" loading="lazy">${f.texto ? `<span>${esc(f.texto)}</span>` : ""}</button>`)
       .join("");
     $("#gallery").addEventListener("click", (e) => {
       const b = e.target.closest("[data-shot]");
       if (!b) return;
       const f = D.fotosReales[+b.dataset.shot];
       $("#modalBody").innerHTML = `<figure class="modal__photo"><img src="${esc(f.src)}" alt="${esc(f.texto || "")}">${f.texto ? `<figcaption>${esc(f.texto)}</figcaption>` : ""}</figure>`;
-      modal.showModal();
+      abrirModal();
     });
   }
 
@@ -373,16 +488,54 @@
   });
 
   /* ---------- Aparición al hacer scroll ---------- */
+  // El escalonado depende de lo que aparece junto, no del puesto en la lista:
+  // lo que entra solo aparece al instante; en grupo, 60ms entre uno y otro (máx. 300ms)
   const io = new IntersectionObserver(
-    (entries) =>
+    (entries) => {
+      let k = 0;
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
+        const d = Math.min(k++, 5) * 60;
+        en.target.style.setProperty("--d", `${d}ms`);
         en.target.classList.add("in");
         const n = en.target.querySelector("[data-count]");
-        if (n) countUp(n);
+        if (n) setTimeout(() => countUp(n), d);
         io.unobserve(en.target);
-      }),
+      });
+    },
     { threshold: 0.15 }
   );
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+  /* ---------- Botón flotante: una sola onda al llegar al precio ---------- */
+  const waFloat = $(".wa-float"), precioSec = $("#precio");
+  if (waFloat && precioSec) {
+    const avisa = new IntersectionObserver(([en]) => {
+      if (!en.isIntersecting || reduceMotion) return;
+      waFloat.classList.add("is-calling");
+      avisa.disconnect();
+    }, { threshold: 0.3 });
+    avisa.observe(precioSec);
+  }
+
+  /* ---------- Pausar animaciones decorativas fuera de pantalla ---------- */
+  const fuera = new IntersectionObserver((entries) =>
+    entries.forEach((en) => en.target.classList.toggle("is-off", !en.isIntersecting)));
+  document.querySelectorAll("main section").forEach((s) => fuera.observe(s));
+
+  /* ---------- Si cambia la preferencia de movimiento con la página abierta ---------- */
+  movReducido.addEventListener("change", () => {
+    reduceMotion = movReducido.matches;
+    ponerEtiqueta();
+    if (reduceMotion) {
+      // todo vuelve a su posición de reposo
+      ["--tx", "--ty"].forEach((p) => tower.style.removeProperty(p));
+      document.querySelectorAll(".card").forEach((el) => {
+        el.classList.remove("is-hover");
+        ["--gmx", "--gmy", "--grx", "--gry"].forEach((p) => el.style.removeProperty(p));
+        ["--rx", "--ry", "--mx", "--my"].forEach((p) => el.querySelector(".card__inner").style.removeProperty(p));
+      });
+    }
+    requestAnimationFrame(() => { layout(); renderExplode(); }); // el build cambia de alto
+  });
 })();
