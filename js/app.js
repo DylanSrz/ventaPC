@@ -99,6 +99,8 @@
     return { el: n, line, spin: (i % 2 ? 1 : -1) * (20 + i * 9) };
   });
   const cpu = D.componentes.find((c) => c.id === "cpu");
+  // Con movimiento reducido el build ya aparece desarmado: no hay nada que deslizar
+  if (reduceMotion) $("#build .eyebrow").textContent = "Toca una pieza para ver su ficha";
   $("#explodeCore").addEventListener("click", () => openModal(cpu));
 
   let geo = null;
@@ -275,7 +277,6 @@
   const cerrarModal = () => {
     if (!modal.open) return;
     modal.classList.remove("is-open");
-    if (reduceMotion) return modal.close();
     clearTimeout(cierre);
     cierre = setTimeout(() => modal.close(), 260); // respaldo por si no llega transitionend
   };
@@ -320,7 +321,7 @@
         nueva.src = th.dataset.foto;
         nueva.decode().catch(() => {}).then(() => {
           img.src = nueva.src;
-          if (!reduceMotion) img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+          img.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
         });
       }
       modal.querySelectorAll(".thumb").forEach((t) => t.classList.toggle("on", t === th));
