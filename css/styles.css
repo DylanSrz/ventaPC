@@ -47,8 +47,18 @@ a, button { -webkit-tap-highlight-color: transparent; }
 a, button { touch-action: manipulation; }
 button, .btn, .nav__links a, .nav__brand { user-select: none; -webkit-user-select: none; }
 .btn, .wa-float, .nav__links a, .nav__brand, .node, .modal__close { -webkit-touch-callout: none; }
-h1, h2, h3, h4 { line-height: 1.08; margin: 0; letter-spacing: -0.02em; }
-h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
+/* Tipografía al estilo Apple: cuanto más grande el texto, más juntas las letras y más apretado el
+   interlineado; los títulos chicos casi sin ajuste. Los títulos reparten sus palabras parejo. */
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+h1 { line-height: 1.04; letter-spacing: -0.025em; }
+h2 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.06; letter-spacing: -0.022em; }
+h3 { line-height: 1.22; letter-spacing: -0.012em; }
+h4 { line-height: 1.3; letter-spacing: -0.006em; }
+@media (min-width: 900px) {
+  h1 { line-height: 1.01; letter-spacing: -0.035em; }
+  h2 { line-height: 1.04; letter-spacing: -0.03em; }
+}
+p { text-wrap: pretty; } /* evita una palabra sola en la última línea */
 .mono { font-family: var(--mono); }
 .muted { color: var(--muted); }
 .small { font-size: 0.9rem; }
@@ -142,7 +152,7 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 
 .price { display: grid; gap: 6px; justify-items: start; padding: 18px 22px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); width: fit-content; max-width: 100%; }
 .price__label { font: 600 .75rem/1 var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-.price__big { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 700; letter-spacing: -.02em; }
+.price__big { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .price__ref { color: var(--muted); }
 .save-chip { margin-top: 4px; padding: .45em .8em; border-radius: 999px; font-weight: 700; font-size: .9rem; color: #03170a; background: linear-gradient(90deg, var(--wa), var(--cyan)); }
 
@@ -249,7 +259,7 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .stat { padding: 26px 18px; text-align: center; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 4px; }
 .stat:first-child { border-radius: var(--radius) 0 0 var(--radius); }
 .stat:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
-.stat strong { font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; }
+.stat strong { font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; letter-spacing: -.025em; line-height: 1.1; }
 .stat span { font-weight: 600; }
 .stat small { color: var(--muted); font-family: var(--mono); font-size: .75rem; }
 @media (max-width: 900px) {
@@ -413,7 +423,7 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 }
 .ring::before { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: var(--bg); }
 .ring > div { display: grid; text-align: center; position: relative; }
-.ring strong { font-size: 2.8rem; line-height: 1; }
+.ring strong { font-size: 2.8rem; line-height: 1; letter-spacing: -.03em; }
 .ring span { color: var(--muted); font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; }
 .ring--idle { background: conic-gradient(from var(--ang), var(--violet), var(--cyan), var(--pink), var(--violet)); animation: spin 6s linear infinite; }
 @media (max-width: 900px) { .pricing { grid-template-columns: minmax(0, 1fr); } }
