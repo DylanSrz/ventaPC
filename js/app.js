@@ -269,24 +269,75 @@
 
   /* ---------- Modal ---------- */
   const modal = $("#modal");
+  const enHoja = matchMedia("(max-width: 720px)"); // en celular la ficha es una hoja que sube desde abajo
   let cierre = null;
+  // Recuerda dónde se tocó por última vez, para que la ficha nazca desde ahí
+  let toque = null;
+  addEventListener("pointerdown", (e) => (toque = { x: e.clientX, y: e.clientY, t: e.timeStamp }), { capture: true, passive: true });
+  const origenDesde = () => {
+    if (enHoja.matches) return;
+    const reciente = toque && performance.now() - toque.t < 1500;
+    const f = document.activeElement;
+    let p = reciente ? toque : null;
+    if (!p && f && f !== document.body) { const r = f.getBoundingClientRect(); p = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+    if (!p) { modal.style.transformOrigin = ""; return; }
+    modal.style.transition = "none";
+    modal.style.transform = "none"; // mide la ficha en su lugar final
+    const r = modal.getBoundingClientRect();
+    modal.style.transformOrigin = `${p.x - r.left}px ${p.y - r.top}px`;
+    modal.style.transform = "";
+    modal.offsetWidth;
+    modal.style.transition = "";
+  };
   const abrirModal = () => {
     clearTimeout(cierre); // si se estaba cerrando, vuelve desde donde iba
-    if (!modal.open) { modal.showModal(); modal.offsetWidth; } // reflow: parte del estado cerrado
+    if (!modal.open) { modal.showModal(); modal.scrollTop = 0; origenDesde(); modal.offsetWidth; } // reflow: parte del estado cerrado
     modal.classList.add("is-open");
   };
   const cerrarModal = () => {
     if (!modal.open) return;
     modal.classList.remove("is-open");
     clearTimeout(cierre);
-    cierre = setTimeout(() => modal.close(), 260); // respaldo por si no llega transitionend
+    cierre = setTimeout(() => modal.close(), 450); // respaldo por si no llega transitionend
   };
   modal.addEventListener("transitionend", (e) => {
-    if (e.target === modal && e.propertyName === "opacity" && !modal.classList.contains("is-open")) {
+    if (e.target === modal && (e.propertyName === "opacity" || e.propertyName === "transform") && !modal.classList.contains("is-open")) {
       clearTimeout(cierre);
       modal.close();
     }
   });
+
+  // Arrastrar la hoja hacia abajo para cerrarla (celular). Sigue al dedo 1:1;
+  // hacia arriba resiste cada vez más; un tirón rápido basta para cerrarla.
+  const agarre = $(".modal__grab");
+  let arrastre = null;
+  const resistencia = (o, d) => (o * d * 0.55) / (d + 0.55 * Math.abs(o));
+  agarre.addEventListener("pointerdown", (e) => {
+    if (!enHoja.matches) return;
+    agarre.setPointerCapture(e.pointerId);
+    arrastre = { y0: e.clientY, dy: 0, alto: modal.offsetHeight, muestras: [[e.timeStamp, 0]] };
+    modal.style.transition = "none";
+  });
+  agarre.addEventListener("pointermove", (e) => {
+    if (!arrastre) return;
+    const dy = e.clientY - arrastre.y0;
+    arrastre.dy = dy;
+    arrastre.muestras = [...arrastre.muestras.filter(([t]) => e.timeStamp - t < 100), [e.timeStamp, dy]]; // últimos 100ms
+    modal.style.transform = `translateY(${dy > 0 ? dy : resistencia(dy, arrastre.alto)}px)`;
+  });
+  const soltar = (e) => {
+    if (!arrastre) return;
+    const { dy, alto, muestras } = arrastre;
+    arrastre = null;
+    // velocidad al soltar (px/ms), con lo que el dedo hizo en los últimos 100ms
+    const [t1, y1] = muestras[0], [t2, y2] = muestras[muestras.length - 1];
+    const velocidad = e.timeStamp - t1 < 100 && t2 > t1 ? (y2 - y1) / (t2 - t1) : 0;
+    modal.style.transition = "";
+    modal.style.transform = ""; // anima desde donde quedó el dedo
+    if (e.type === "pointerup" && dy > 24 && (dy > alto * 0.3 || velocidad > 0.11)) cerrarModal();
+  };
+  agarre.addEventListener("pointerup", soltar);
+  agarre.addEventListener("pointercancel", soltar);
   modal.addEventListener("cancel", (e) => { e.preventDefault(); cerrarModal(); }); // tecla Escape
   const openModal = (c) => {
     if (!c) return;
