@@ -185,7 +185,7 @@
 
   /* ---------- Tarjetas holográficas ---------- */
   const card = (c, i) => `
-    <article class="card reveal ${c.vendido ? "is-sold" : ""}" style="--d:${i * 60}ms" data-id="${c.id}">
+    <article class="card reveal ${c.vendido ? "is-sold" : ""}" data-id="${c.id}">
       <div class="card__inner">
         <div class="card__holo"></div>
         ${visual(c, "card__visual")}
@@ -331,7 +331,7 @@
     D.rendimiento
       .map((r, i) => {
         const tier = r.fps >= hz ? "top" : r.fps >= 90 ? "mid" : "ok";
-        return `<div class="bar reveal" style="--d:${i * 70}ms">
+        return `<div class="bar reveal">
           <div class="bar__label"><strong>${esc(r.juego)}</strong><small>${esc(r.ajustes)}</small></div>
           <div class="bar__track"><i class="bar__fill bar__fill--${tier}" style="--w:${(r.fps / escala) * 100}%"></i></div>
           <span class="bar__val mono">~${r.fps}<small> fps</small></span>
@@ -339,14 +339,14 @@
       })
       .join("");
   $("#perfUses").innerHTML = D.usos
-    .map((u, i) => `<div class="use reveal" style="--d:${i * 80}ms"><h4>${esc(u.titulo)}</h4><p>${esc(u.texto)}</p></div>`)
+    .map((u, i) => `<div class="use reveal"><h4>${esc(u.titulo)}</h4><p>${esc(u.texto)}</p></div>`)
     .join("");
 
   /* ---------- Fotos reales ---------- */
   if (D.fotosReales.length) {
     $("#fotos").hidden = false;
     $("#gallery").innerHTML = D.fotosReales
-      .map((f, i) => `<button class="shot reveal" type="button" data-shot="${i}" style="--d:${i * 60}ms"><img src="${esc(f.src)}" alt="${esc(f.texto || "Foto real del equipo")}" loading="lazy">${f.texto ? `<span>${esc(f.texto)}</span>` : ""}</button>`)
+      .map((f, i) => `<button class="shot reveal" type="button" data-shot="${i}"><img src="${esc(f.src)}" alt="${esc(f.texto || "Foto real del equipo")}" loading="lazy">${f.texto ? `<span>${esc(f.texto)}</span>` : ""}</button>`)
       .join("");
     $("#gallery").addEventListener("click", (e) => {
       const b = e.target.closest("[data-shot]");
@@ -408,15 +408,21 @@
   });
 
   /* ---------- Aparición al hacer scroll ---------- */
+  // El escalonado depende de lo que aparece junto, no del puesto en la lista:
+  // lo que entra solo aparece al instante; en grupo, 60ms entre uno y otro (máx. 300ms)
   const io = new IntersectionObserver(
-    (entries) =>
+    (entries) => {
+      let k = 0;
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
+        const d = Math.min(k++, 5) * 60;
+        en.target.style.setProperty("--d", `${d}ms`);
         en.target.classList.add("in");
         const n = en.target.querySelector("[data-count]");
-        if (n) countUp(n);
+        if (n) setTimeout(() => countUp(n), d);
         io.unobserve(en.target);
-      }),
+      });
+    },
     { threshold: 0.15 }
   );
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
