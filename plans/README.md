@@ -8,5 +8,6 @@
 | 004 | [Ficha sin rebote, con salida animada y fotos que se funden](004-ficha-sin-rebote-y-con-salida.md) | MEDIUM | DONE |
 | 005 | [Escalonado según lo que aparece junto](005-escalonado-por-lo-visible.md) | MEDIUM | DONE |
 | 006 | [Barra superior ligera: vidrio esmerilado y línea solo al bajar](006-barra-superior-ligera.md) | LOW | DONE |
+| 007 | [Menos movimiento constante y pausa fuera de pantalla](007-menos-movimiento-constante.md) | MEDIUM | DONE |
 
 Orden recomendado: 001 primero (define el token `--ease-out` que usarán los planes siguientes).

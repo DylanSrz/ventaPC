@@ -42,8 +42,6 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .muted { color: var(--muted); }
 .small { font-size: 0.9rem; }
 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.grad--anim { background-size: 200% 100%; animation: slide 6s linear infinite; }
-@keyframes slide { to { background-position: -200% 0; } }
 
 /* Fondo */
 .bg-grid {
@@ -186,8 +184,7 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .explode__head { text-align: center; }
 .explode__stage { position: relative; flex: 1; margin-top: 12px; }
 .explode__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.explode__lines line { stroke: rgba(0,229,255,.45); stroke-width: 1.5; stroke-dasharray: 4 6; animation: dash 1s linear infinite; }
-@keyframes dash { to { stroke-dashoffset: -20; } }
+.explode__lines line { stroke: rgba(0,229,255,.45); stroke-width: 1.5; stroke-dasharray: 4 6; }
 .explode__core {
   --p: 0;
   position: absolute; left: 50%; top: 50%; translate: -50% -50%;
@@ -407,7 +404,7 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 /* CONTACTO */
 .contact { padding-bottom: 60px; }
 .contact__box { position: relative; text-align: center; padding: clamp(36px, 6vw, 70px) clamp(18px, 4vw, 40px); border-radius: 28px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
-.contact__box::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: conic-gradient(from var(--ang), transparent 60%, var(--cyan), var(--violet), transparent 90%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 5s linear infinite; pointer-events: none; }
+.contact__box::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: conic-gradient(from var(--ang), transparent 60%, var(--cyan), var(--violet), transparent 90%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 .contact__box .muted { max-width: 520px; margin: 14px auto 28px; font-size: 1.05rem; }
 .contact__cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .contact__facts { list-style: none; padding: 0; margin: 36px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
@@ -479,6 +476,9 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 /* Aparición */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease var(--d, 0ms), transform .7s cubic-bezier(.2,.8,.2,1) var(--d, 0ms); }
 .reveal.in { opacity: 1; transform: none; }
+
+/* Las animaciones decorativas se pausan cuando su sección no está en pantalla (js: is-off) */
+.is-off *, .is-off *::before, .is-off *::after { animation-play-state: paused !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

@@ -238,14 +238,28 @@
 
     // En celular: el brillo holográfico sigue la inclinación del teléfono
     if (matchMedia("(pointer:coarse)").matches && "DeviceOrientationEvent" in window) {
+      // Solo se actualizan las tarjetas que están en pantalla, una vez por cuadro
+      // (antes se recalculaba toda la página en cada movimiento del teléfono)
+      const visibles = new Set();
+      const ojo = new IntersectionObserver((entries) =>
+        entries.forEach((en) => (en.isIntersecting ? visibles.add(en.target) : visibles.delete(en.target))));
+      document.querySelectorAll(".card").forEach((el) => ojo.observe(el));
+      let giro = null;
       addEventListener("deviceorientation", (e) => {
         if (e.gamma == null) return;
-        const gx = clamp((e.gamma + 30) / 60), gy = clamp((e.beta - 20) / 60);
-        const root = document.documentElement.style;
-        root.setProperty("--gmx", `${gx * 100}%`);
-        root.setProperty("--gmy", `${gy * 100}%`);
-        root.setProperty("--grx", `${(0.5 - gy) * 8}deg`);
-        root.setProperty("--gry", `${(gx - 0.5) * 10}deg`);
+        const pendiente = giro;
+        giro = { gx: clamp((e.gamma + 30) / 60), gy: clamp((e.beta - 20) / 60) };
+        if (pendiente) return;
+        requestAnimationFrame(() => {
+          const { gx, gy } = giro;
+          giro = null;
+          visibles.forEach((el) => {
+            el.style.setProperty("--gmx", `${gx * 100}%`);
+            el.style.setProperty("--gmy", `${gy * 100}%`);
+            el.style.setProperty("--grx", `${(0.5 - gy) * 8}deg`);
+            el.style.setProperty("--gry", `${(gx - 0.5) * 10}deg`);
+          });
+        });
       });
     }
   }
@@ -442,4 +456,9 @@
     }, { threshold: 0.3 });
     avisa.observe(precioSec);
   }
+
+  /* ---------- Pausar animaciones decorativas fuera de pantalla ---------- */
+  const fuera = new IntersectionObserver((entries) =>
+    entries.forEach((en) => en.target.classList.toggle("is-off", !en.isIntersecting)));
+  document.querySelectorAll("main section").forEach((s) => fuera.observe(s));
 })();
