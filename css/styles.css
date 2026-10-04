@@ -419,13 +419,13 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 60;
   width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
   background: var(--wa); color: #fff; box-shadow: 0 10px 30px rgba(37,211,102,.5);
-  animation: bob 3s ease-in-out infinite;
   transition: scale 160ms var(--ease-out);
 }
 .wa-float:active { scale: .92; transition-duration: 100ms; }
 .wa-float svg { width: 32px; height: 32px; }
-.wa-float::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--wa); animation: ripple 2.4s infinite; }
-@keyframes bob { 50% { transform: translateY(-4px); } }
+/* Quieto en reposo; una sola onda cuando la persona llega al precio (js: is-calling) */
+.wa-float::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--wa); opacity: 0; pointer-events: none; }
+.wa-float.is-calling::after { animation: ripple 1.4s var(--ease-out); }
 @keyframes ripple { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
 
 /* MODAL */

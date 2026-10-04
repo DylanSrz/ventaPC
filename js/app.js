@@ -388,4 +388,15 @@
     { threshold: 0.15 }
   );
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+  /* ---------- Botón flotante: una sola onda al llegar al precio ---------- */
+  const waFloat = $(".wa-float"), precioSec = $("#precio");
+  if (!reduceMotion && waFloat && precioSec) {
+    const avisa = new IntersectionObserver(([en]) => {
+      if (!en.isIntersecting) return;
+      waFloat.classList.add("is-calling");
+      avisa.disconnect();
+    }, { threshold: 0.3 });
+    avisa.observe(precioSec);
+  }
 })();
