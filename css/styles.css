@@ -353,8 +353,9 @@ h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
 .shot { display: block; width: 100%; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; cursor: zoom-in; background: none; position: relative; break-inside: avoid; }
 .shot img { width: 100%; transition: transform .5s; }
 @media (hover: hover) and (pointer: fine) { .shot:hover img { transform: scale(1.04); } }
-.shot { transition: scale var(--dur-press) var(--ease-out); }
-.shot:active { scale: .98; transition-duration: var(--dur-press-in); }
+/* Las fotos también llevan .reveal, cuya transición pisaba la del toque: se juntan las dos */
+.shot.reveal { transition: opacity .7s ease var(--d, 0ms), transform .7s var(--ease-out) var(--d, 0ms), scale var(--dur-press) var(--ease-out); }
+.shot:active { scale: .98; transition-duration: .7s, .7s, var(--dur-press-in); }
 .shot span { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 14px 12px; text-align: left; color: #fff; font-size: .9rem; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
 
 /* PRECIO */
