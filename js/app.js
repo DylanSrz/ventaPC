@@ -154,6 +154,11 @@
     requestAnimationFrame(() => { renderExplode(); ticking = false; });
   };
   addEventListener("scroll", onScroll, { passive: true });
+  // Barra superior: la línea de abajo solo aparece cuando hay contenido pasando por detrás
+  const nav = $(".nav");
+  const marcaNav = () => nav.classList.toggle("is-scrolled", scrollY > 2);
+  addEventListener("scroll", marcaNav, { passive: true });
+  marcaNav();
   addEventListener("resize", () => { layout(); renderExplode(); });
   if (document.fonts) document.fonts.ready.then(() => { layout(); renderExplode(); });
   layout();
