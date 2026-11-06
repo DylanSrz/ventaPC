@@ -1,9 +1,33 @@
-# ventaPC
+# 🖥️ ventaPC
 
-Landing page para vender mi PC gamer completo (torre + periféricos).
-Es HTML, CSS y JS puro, sin compilación: se publica directo en GitHub Pages.
+Landing page para vender mi PC gamer completo (torre y periféricos). Está hecha con HTML, CSS y JavaScript puros, sin frameworks ni compilación, y se publica directo en GitHub Pages.
 
-**URL:** https://dylansrz.github.io/ventaPC/
+**Demo:** https://dylansrz.github.io/ventaPC/
+
+![Portada de la landing](docs/captura.png)
+
+## ✨ Qué hace
+
+- **Un solo archivo de datos:** precios, componentes y textos viven en `js/data.js`, y la página se arma desde ahí.
+- **Ahorro calculado:** suma los precios de referencia y muestra cuánto se ahorra frente al precio de venta.
+- **Ficha por componente** con especificaciones y galería de imágenes.
+- **Botón a WhatsApp** con un mensaje ya escrito.
+- **Vista previa al compartir** con una imagen Open Graph propia.
+- **Accesible al movimiento:** las animaciones respetan la preferencia de movimiento reducido del sistema.
+
+## 🛠️ Stack
+
+HTML · CSS · JavaScript vanilla · GitHub Pages
+
+## 🚀 Cómo correrlo
+
+No necesita instalación. Sirve la carpeta con cualquier servidor estático:
+
+```bash
+python -m http.server 8000
+```
+
+Luego abre http://localhost:8000.
 
 ## Editar la información
 
@@ -45,3 +69,7 @@ El ahorro (valor y %) se calcula solo: suma de los precios de referencia menos e
 
 `og.png` es la imagen que aparece al pegar el link en WhatsApp o redes.
 Se genera a partir de `tools/og.html` (captura de 1200×630).
+
+## Licencia
+
+El código está bajo licencia [MIT](LICENSE). Las imágenes de productos pertenecen a sus fabricantes.
