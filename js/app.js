@@ -33,9 +33,6 @@
     [...partes].sort((a, b) => (b.x % 1) - (a.x % 1)).forEach((p) => (p.extra = sobra-- > 0 ? 1 : 0));
     partes.forEach((p) => enCombo.set(p.c.id, (Math.floor(p.x) + p.extra) * 100));
   }
-  // Venta por partes (sección "Arma tu oferta"): la torre completa o cada periférico
-  const partesOn = !!(C.ventaPorPartes && precio);
-  const interesDe = (c) => (D.componentes.includes(c) ? "torre" : c.id); // una pieza de la torre = la torre completa
   // Bloque de precio de una pieza: precio en el combo y, debajo, la referencia tachada
   const precioPieza = (c, etiquetaRef) =>
     enCombo.has(c.id)
@@ -222,7 +219,6 @@
       <div class="card__inner">
         <div class="card__holo"></div>
         ${visual(c, "card__visual")}
-        ${partesOn && !c.vendido ? `<button class="interes" type="button" data-interes="${interesDe(c)}" aria-pressed="false"${interesDe(c) === "torre" ? ' title="La torre se vende completa"' : ""}><span>＋ Me interesa</span></button>` : ""}
         <div class="card__body">
           <div class="card__tags"><span class="tag">${esc(c.categoria)}</span>${c.destacado ? `<span class="tag tag--hl">${esc(c.destacado)}</span>` : ""}</div>
           <h3>${esc(titulo(c))}</h3>
@@ -383,7 +379,6 @@
         <div class="modal__foot">
           <div class="card__price">${precioPieza(c, `Precio de referencia${c.cantidad > 1 ? ` (${c.cantidad} × ${fmt(c.precioReferencia)})` : ""}`) || (c.precioReferencia ? `<small>Precio de referencia${c.cantidad > 1 ? ` · ${c.cantidad} × ${fmt(c.precioReferencia)}` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`)}${c.fuentePrecio ? `<span class="price-src">Fuente: ${esc(c.fuentePrecio)}</span>` : ""}</div>
           <div class="card__btns">
-            ${partesOn && !c.vendido ? `<button class="btn btn--sm btn--ghost interes-btn" type="button" data-interes="${interesDe(c)}" aria-pressed="false"><span>＋ Me interesa</span></button>` : ""}
             <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener">Página oficial ↗</a>
             ${waValido ? `<a class="btn btn--sm btn--wa" href="${waLink(`(Pregunta sobre: ${c.nombre})`)}" target="_blank" rel="noopener">Preguntar</a>` : ""}
           </div>
@@ -492,209 +487,13 @@
        ${incluidos ? `<p class="muted small">Además van incluidos: ${esc(incluidos)}.</p>` : ""}
        <a class="btn btn--wa" href="${waValido ? waLink() : "#contacto"}" ${waValido ? 'target="_blank" rel="noopener"' : ""}>Consultar precio</a>`;
 
-  /* ---------- Arma tu oferta (venta por partes) ---------- */
-  if (partesOn) {
-    const P = C.partes || {};
-    const DESC = P.descuentoPct ?? 30, AVISO = P.avisoOfertaBajaPct ?? 15;
-    const centena = (n) => Math.round(n / 100) * 100;
-    const gab = D.componentes.find((c) => c.id === "gabinete") || D.componentes[0];
-    // Lo que se puede elegir: la torre entera y cada periférico
-    const elegibles = [
-      { id: "torre", nombre: "Torre completa", detalle: D.componentes.map((c) => c.corto).join(" · "), ref: D.componentes.reduce((s, c) => s + ref(c), 0), imagen: gab.imagen, vendido: D.componentes.some((c) => c.vendido) },
-      ...D.perifericos.map((c) => ({ id: c.id, nombre: titulo(c), detalle: c.categoria, ref: ref(c), imagen: c.imagen, vendido: c.vendido })),
-    ].map((it) => ({ ...it, suelto: centena(it.ref * (1 - DESC / 100)) }));
-    const disponibles = elegibles.filter((it) => !it.vendido);
-    const porId = new Map(elegibles.map((it) => [it.id, it]));
-
-    // Estado: lo marcado y la oferta escrita. Se recuerda si la persona vuelve (si el navegador lo permite).
-    const CLAVE = "ventapc-oferta";
-    const sel = new Set();
-    let oferta = 0;
-    try {
-      const g = JSON.parse(localStorage.getItem(CLAVE) || "null");
-      if (g) { (g.sel || []).forEach((id) => porId.has(id) && !porId.get(id).vendido && sel.add(id)); oferta = +g.oferta || 0; }
-    } catch (_) { /* sin almacenamiento: empieza vacío */ }
-    const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify({ sel: [...sel], oferta })); } catch (_) {} };
-
-    const calcular = () => {
-      const items = disponibles.filter((it) => sel.has(it.id));
-      const todo = items.length === disponibles.length && items.length > 0;
-      const suma = items.reduce((s, it) => s + it.suelto, 0);
-      const sugerido = todo ? precio : suma;
-      return { items, todo, suma, sugerido, faltan: disponibles.length - items.length };
-    };
-    const corto = ({ items, todo }) =>
-      todo ? "Combo completo" : items.length === 1 ? items[0].nombre : `${items.length} elementos`;
-    const mensaje = (k) => {
-      const lineas = ["¡Hola! Vi tu PC gamer en la página y quiero hacerte una oferta."];
-      if (k.todo) lineas.push("Me interesa el combo completo.");
-      else lineas.push("Me interesa:", ...k.items.map((it) => `• ${it.nombre}`));
-      lineas.push(`Precio sugerido en la página: ${fmt(k.sugerido)}`);
-      lineas.push(oferta ? `Mi oferta: ${fmt(oferta)}` : "¿Qué precio me dejas?");
-      return lineas.join("\n");
-    };
-
-    // Lista + resumen. Se usa en la sección y, en el celular, dentro de la hoja que sube desde abajo.
-    const vistaOferta = () => `
-      <div class="oferta">
-        <div class="oferta__elegir">
-          <div class="oferta__atajos">
-            <button class="chip" type="button" data-preset="torre">Torre completa</button>
-            <button class="chip" type="button" data-preset="perifericos">Solo periféricos</button>
-            <button class="chip" type="button" data-preset="todo">Todo (combo)</button>
-            <button class="chip chip--suave" type="button" data-preset="limpiar">Limpiar</button>
-          </div>
-          <ul class="oferta__lista">${elegibles.map((it) => `
-            <li><button class="oferta__item" type="button" data-interes="${it.id}" aria-pressed="false"${it.vendido ? " disabled" : ""}>
-              <span class="oferta__foto"><img src="${esc(it.imagen)}" alt="" loading="lazy" onerror="this.remove()"></span>
-              <span class="oferta__txt"><b>${esc(it.nombre)}</b><small>${it.vendido ? "Vendido" : esc(it.detalle)}</small></span>
-              <span class="oferta__precio">${it.vendido ? "—" : fmt(it.suelto)}<small>Ref. <s>${fmt(it.ref)}</s></small></span>
-              <span class="oferta__check" aria-hidden="true"></span>
-            </button></li>`).join("")}
-          </ul>
-        </div>
-        <div class="oferta__resumen">
-          <small class="oferta__label" data-o="corto"></small>
-          <strong class="oferta__sugerido" data-o="sugerido"></strong>
-          <p class="oferta__nota" data-o="nota"></p>
-          <div class="oferta__campo" data-o="campo">
-            <label class="oferta__label">Tu oferta
-              <span class="oferta__input"><span aria-hidden="true">$</span><input class="js-oferta-input" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="Escribe tu oferta"></span>
-            </label>
-            <div class="oferta__rapidos">
-              <button class="chip" type="button" data-rapido="0">Sugerido</button>
-              <button class="chip" type="button" data-rapido="5">−5%</button>
-              <button class="chip" type="button" data-rapido="10">−10%</button>
-            </div>
-            <p class="oferta__aviso" data-o="aviso" aria-live="polite"></p>
-          </div>
-          <div class="oferta__acciones">
-            <a class="btn btn--wa" data-o-enviar target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wa"/></svg>Enviar oferta por WhatsApp</a>
-            <button class="btn btn--ghost" type="button" data-o-copiar>Copiar mensaje</button>
-          </div>
-          <p class="oferta__legal">Tu oferta no es un compromiso de compra: la confirmamos juntos por WhatsApp.</p>
-        </div>
-      </div>`;
-
-    $("#oferta").hidden = false;
-    $("#ofertaBox").innerHTML = vistaOferta();
-    const barra = $("#ofertaBarra");
-    let seccionVisible = false;
-
-    // Pinta todo lo que depende de la selección. Sin animaciones: se toca muchas veces seguidas.
-    const pintar = () => {
-      const k = calcular();
-      const hay = k.items.length > 0;
-      document.querySelectorAll("[data-interes]").forEach((b) => {
-        const on = sel.has(b.dataset.interes);
-        b.setAttribute("aria-pressed", on);
-        b.classList.toggle("on", on);
-        const t = b.querySelector(":scope > span");
-        if (t && (b.classList.contains("interes") || b.classList.contains("interes-btn"))) t.textContent = on ? "✓ En tu oferta" : "＋ Me interesa";
-      });
-      document.querySelectorAll('[data-o="corto"]').forEach((e) => (e.textContent = hay ? corto(k) : "Tu selección"));
-      document.querySelectorAll('[data-o="sugerido"]').forEach((e) => (e.textContent = hay ? fmt(k.sugerido) : "—"));
-      document.querySelectorAll('[data-o="nota"]').forEach((e) => {
-        if (!hay) e.textContent = "Marca lo que te interesa para ver el precio sugerido.";
-        else if (k.todo) e.textContent = `Es el combo completo, el mejor precio: ahorras ${fmt(ahorro)} frente a las piezas nuevas.`;
-        else if (k.suma >= precio) e.innerHTML = `Por ${fmt(precio)} te llevas <b>todo el combo</b>: sale más barato que tu selección. <button class="chip chip--combo" type="button" data-preset="todo">Llevar el combo</button>`;
-        else e.innerHTML = `Por <b>${fmt(precio - k.suma)}</b> más te llevas todo el combo (${k.faltan} ${k.faltan === 1 ? "elemento" : "elementos"} más). <button class="chip chip--combo" type="button" data-preset="todo">Llevar el combo</button>`;
-      });
-      const baja = hay && oferta > 0 && oferta < k.sugerido * (1 - AVISO / 100);
-      document.querySelectorAll('[data-o="aviso"]').forEach((e) => (e.textContent = baja ? "Es una oferta baja; puede que no se acepte, pero igual puedes enviarla." : ""));
-      document.querySelectorAll('[data-o="campo"]').forEach((e) => e.classList.toggle("is-off", !hay));
-      document.querySelectorAll(".js-oferta-input").forEach((i) => {
-        if (document.activeElement !== i) i.value = oferta ? oferta.toLocaleString("es-CO") : "";
-        i.disabled = !hay;
-      });
-      const texto = hay ? mensaje(k) : "";
-      document.querySelectorAll("[data-o-enviar]").forEach((a) => {
-        a.href = waValido && hay ? `https://wa.me/${C.whatsapp}?text=${encodeURIComponent(texto)}` : "#oferta";
-        a.classList.toggle("is-disabled", !hay);
-        a.setAttribute("aria-disabled", !hay);
-      });
-      document.querySelectorAll("[data-o-copiar]").forEach((b) => (b.disabled = !hay));
-      barra.classList.toggle("is-visible", hay && !seccionVisible);
-      guardar();
-    };
-
-    const toggle = (id, desdeTarjeta) => {
-      const it = porId.get(id);
-      if (!it || it.vendido) return;
-      oferta = 0; // la oferta escrita era para otra selección
-      if (sel.has(id)) sel.delete(id);
-      else {
-        sel.add(id);
-        if (desdeTarjeta && id === "torre") toast("La torre se vende completa: la agregué a tu oferta");
-      }
-      pintar();
-    };
-    const preset = (p) => {
-      sel.clear();
-      oferta = 0;
-      if (p === "torre") sel.add("torre");
-      if (p === "perifericos") D.perifericos.forEach((c) => sel.add(c.id));
-      if (p === "todo") elegibles.forEach((it) => sel.add(it.id));
-      disponibles.length !== elegibles.length && elegibles.forEach((it) => it.vendido && sel.delete(it.id));
-      pintar();
-    };
-
-    document.addEventListener("click", (e) => {
-      const b = e.target.closest("[data-interes]");
-      if (b) { toggle(b.dataset.interes, !b.classList.contains("oferta__item")); return; }
-      const pr = e.target.closest("[data-preset]");
-      if (pr) { preset(pr.dataset.preset); return; }
-      const r = e.target.closest("[data-rapido]");
-      if (r) {
-        const k = calcular();
-        if (k.items.length) { oferta = Math.round((k.sugerido * (1 - +r.dataset.rapido / 100)) / 10000) * 10000; pintar(); }
-        return;
-      }
-      const env = e.target.closest("[data-o-enviar]");
-      if (env && (!calcular().items.length || !waValido)) {
-        e.preventDefault();
-        if (!waValido && calcular().items.length) toast("Falta configurar el número de WhatsApp en js/data.js");
-        return;
-      }
-      if (e.target.closest("[data-o-copiar]")) {
-        const k = calcular();
-        if (!k.items.length) return;
-        navigator.clipboard?.writeText(mensaje(k)).then(() => toast("Mensaje copiado ✔"), () => toast("No se pudo copiar"));
-        return;
-      }
-      if (e.target.closest("[data-o-abrir]")) {
-        if (enHoja.matches) {
-          // Celular: la oferta se abre en la hoja que sube desde abajo
-          $("#modalBody").innerHTML = `<div class="modal__oferta"><h3>Tu oferta</h3>${vistaOferta()}</div>`;
-          abrirModal();
-          pintar();
-        } else $("#oferta").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-      }
-    });
-    // El campo de la oferta: solo números, con puntos de miles mientras se escribe
-    document.addEventListener("input", (e) => {
-      const i = e.target.closest(".js-oferta-input");
-      if (!i) return;
-      oferta = +i.value.replace(/\D/g, "").slice(0, 10) || 0;
-      i.value = oferta ? oferta.toLocaleString("es-CO") : "";
-      document.querySelectorAll(".js-oferta-input").forEach((o) => o !== i && (o.value = i.value));
-      pintar();
-    });
-    // La barrita se esconde mientras la sección de la oferta está en pantalla
-    new IntersectionObserver(([en]) => { seccionVisible = en.isIntersecting; pintar(); }, { threshold: 0.05 }).observe($("#oferta"));
-    modal.addEventListener("close", pintar);
-    // Cada vez que se abre una ficha, su botón "Me interesa" muestra el estado actual
-    new MutationObserver(pintar).observe($("#modalBody"), { childList: true });
-    pintar();
-  }
-
   /* ---------- Datos de la venta ---------- */
   const facts = [
     ["Estado", C.estado],
     ["Garantía", C.garantia],
     ["Ubicación", C.ubicacion],
     ["Entrega", C.entrega],
-    ["Venta por partes", C.ventaPorPartes ? "Periféricos por separado; la torre, completa" : "Solo el combo completo"],
+    ["Venta por partes", C.ventaPorPartes ? "Sí, pregunta por la pieza que te interesa" : "Solo el combo completo"],
   ].filter(([, v]) => v);
   $("#facts").innerHTML = facts.map(([k, v]) => `<li><small>${esc(k)}</small><b>${esc(v)}</b></li>`).join("");
 
