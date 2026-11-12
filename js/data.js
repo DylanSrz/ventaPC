@@ -18,7 +18,7 @@ window.VENTA = {
     mensajeWhatsapp: "¡Hola! Vi tu PC gamer en la página y me interesa. ¿Sigue disponible?",
 
     // Precio al que vendes TODO el combo. null = aún no definido ("Consultar precio")
-    precioVenta: 8990000,
+    precioVenta: 7990000,
 
     // ¿Aceptas vender piezas por separado?
     ventaPorPartes: false,
