@@ -33,10 +33,10 @@
     [...partes].sort((a, b) => (b.x % 1) - (a.x % 1)).forEach((p) => (p.extra = sobra-- > 0 ? 1 : 0));
     partes.forEach((p) => enCombo.set(p.c.id, (Math.floor(p.x) + p.extra) * 100));
   }
-  // Bloque de precio de una pieza: precio en el combo, y debajo la referencia tachada y el % de descuento
+  // Bloque de precio de una pieza: precio en el combo y, debajo, la referencia tachada
   const precioPieza = (c, etiquetaRef) =>
     enCombo.has(c.id)
-      ? `<small>En el combo${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(enCombo.get(c.id))}<span class="card__ref">${etiquetaRef} <s>${fmt(ref(c))}</s> <b class="off">−${ahorroPct}%</b></span>`
+      ? `<small>En el combo${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(enCombo.get(c.id))}<span class="card__ref">${etiquetaRef} <s>${fmt(ref(c))}</s></span>`
       : null;
 
   /* ---------- Toast ---------- */
@@ -457,7 +457,7 @@
   /* ---------- Recibo de precio ---------- */
   const linea = (c) =>
     enCombo.has(c.id)
-      ? `<li class="has-ref ${c.vendido ? "is-sold" : ""}"><div class="receipt__row"><span>${esc(titulo(c))}</span><i></i><b>${fmt(enCombo.get(c.id))}</b></div><small class="receipt__was">Ref. <s>${fmt(ref(c))}</s> · <b>−${ahorroPct}%</b></small></li>`
+      ? `<li class="has-ref ${c.vendido ? "is-sold" : ""}"><div class="receipt__row"><span>${esc(titulo(c))}</span><i></i><b>${fmt(enCombo.get(c.id))}</b></div><small class="receipt__was">Ref. <s>${fmt(ref(c))}</s></small></li>`
       : `<li class="${c.vendido ? "is-sold" : ""}"><span>${esc(titulo(c))}</span><i></i><b>${c.precioReferencia ? fmt(ref(c)) : "Incluido"}</b></li>`;
   const barcode = Array.from({ length: 48 }, (_, i) => `<i style="width:${1 + ((i * 7) % 4)}px"></i>`).join("");
   $("#receipt").innerHTML = `
