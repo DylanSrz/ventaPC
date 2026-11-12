@@ -20,8 +20,17 @@ window.VENTA = {
     // Precio al que vendes TODO el combo. null = aún no definido ("Consultar precio")
     precioVenta: 7990000,
 
-    // ¿Aceptas vender piezas por separado?
-    ventaPorPartes: false,
+    // ¿Aceptas ofertas por partes? La torre se vende siempre completa y los periféricos
+    // uno por uno. Activa la sección "Arma tu oferta" y el botón "Me interesa".
+    ventaPorPartes: true,
+    partes: {
+      // Descuento por partes, sobre el precio de referencia (menor que el del combo,
+      // para que el combo completo siga siendo la mejor opción)
+      descuentoPct: 30,
+      // Si la oferta queda más de este % por debajo del precio sugerido, se avisa con
+      // amabilidad que puede no aceptarse (igual se puede enviar)
+      avisoOfertaBajaPct: 15,
+    },
 
     ubicacion: "Barranquilla, Colombia",
     entrega: "Entrega presencial en Barranquilla",
