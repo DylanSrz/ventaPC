@@ -22,6 +22,23 @@
   const ahorro = precio ? Math.max(0, totalRef - precio) : 0;
   const ahorroPct = precio && totalRef ? Math.round((ahorro / totalRef) * 100) : 0;
 
+  // Precio de cada pieza dentro del combo: el mismo descuento para todas, proporcional a su
+  // valor de referencia. Se redondea a centenas repartiendo el sobrante para que la suma dé
+  // exactamente el precio de venta.
+  const enCombo = new Map();
+  if (precio && totalRef) {
+    const con = todos.filter((c) => ref(c) > 0);
+    const partes = con.map((c) => ({ c, x: (ref(c) * precio) / totalRef / 100 }));
+    let sobra = Math.round(precio / 100) - partes.reduce((s, p) => s + Math.floor(p.x), 0);
+    [...partes].sort((a, b) => (b.x % 1) - (a.x % 1)).forEach((p) => (p.extra = sobra-- > 0 ? 1 : 0));
+    partes.forEach((p) => enCombo.set(p.c.id, (Math.floor(p.x) + p.extra) * 100));
+  }
+  // Bloque de precio de una pieza: precio en el combo, y debajo la referencia tachada y el % de descuento
+  const precioPieza = (c, etiquetaRef) =>
+    enCombo.has(c.id)
+      ? `<small>En el combo${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(enCombo.get(c.id))}<span class="card__ref">${etiquetaRef} <s>${fmt(ref(c))}</s> <b class="off">−${ahorroPct}%</b></span>`
+      : null;
+
   /* ---------- Toast ---------- */
   const toast = (msg) => {
     const t = $("#toast");
@@ -207,7 +224,7 @@
           <h3>${esc(titulo(c))}</h3>
           <ul class="card__specs">${c.specs.slice(0, 3).map(([k, v]) => `<li><span>${esc(k)}</span><b>${esc(v)}</b></li>`).join("")}</ul>
           <div class="card__foot">
-            <div class="card__price">${c.precioReferencia ? `<small>Referencia${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}</div>
+            <div class="card__price">${precioPieza(c, "Ref.") || (c.precioReferencia ? `<small>Referencia${c.cantidad > 1 ? ` · ${c.cantidad} unidades` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`)}</div>
             <div class="card__btns">
               <button class="btn btn--sm btn--ghost" type="button" data-open="${c.id}">Ficha</button>
               <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener" aria-label="Página oficial de ${esc(c.nombre)}">Oficial ↗</a>
@@ -360,7 +377,7 @@
         <table class="spec-table">${c.specs.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>
         ${c.video ? `<button class="yt" type="button" data-yt="${esc(c.video)}" style="background-image:url(https://i.ytimg.com/vi/${esc(c.video)}/hqdefault.jpg)"><span>▶</span><em>Ver video del producto</em></button>` : ""}
         <div class="modal__foot">
-          <div class="card__price">${c.precioReferencia ? `<small>Precio de referencia${c.cantidad > 1 ? ` · ${c.cantidad} × ${fmt(c.precioReferencia)}` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`}${c.fuentePrecio ? `<span class="price-src">Fuente: ${esc(c.fuentePrecio)}</span>` : ""}</div>
+          <div class="card__price">${precioPieza(c, `Precio de referencia${c.cantidad > 1 ? ` (${c.cantidad} × ${fmt(c.precioReferencia)})` : ""}`) || (c.precioReferencia ? `<small>Precio de referencia${c.cantidad > 1 ? ` · ${c.cantidad} × ${fmt(c.precioReferencia)}` : ""}</small>${fmt(ref(c))}` : `<small>Incluido</small>en el combo`)}${c.fuentePrecio ? `<span class="price-src">Fuente: ${esc(c.fuentePrecio)}</span>` : ""}</div>
           <div class="card__btns">
             <a class="btn btn--sm btn--link" href="${esc(c.link)}" target="_blank" rel="noopener">Página oficial ↗</a>
             ${waValido ? `<a class="btn btn--sm btn--wa" href="${waLink(`(Pregunta sobre: ${c.nombre})`)}" target="_blank" rel="noopener">Preguntar</a>` : ""}
@@ -439,7 +456,9 @@
 
   /* ---------- Recibo de precio ---------- */
   const linea = (c) =>
-    `<li class="${c.vendido ? "is-sold" : ""}"><span>${esc(titulo(c))}</span><i></i><b>${c.precioReferencia ? fmt(ref(c)) : "Incluido"}</b></li>`;
+    enCombo.has(c.id)
+      ? `<li class="has-ref ${c.vendido ? "is-sold" : ""}"><div class="receipt__row"><span>${esc(titulo(c))}</span><i></i><b>${fmt(enCombo.get(c.id))}</b></div><small class="receipt__was">Ref. <s>${fmt(ref(c))}</s> · <b>−${ahorroPct}%</b></small></li>`
+      : `<li class="${c.vendido ? "is-sold" : ""}"><span>${esc(titulo(c))}</span><i></i><b>${c.precioReferencia ? fmt(ref(c)) : "Incluido"}</b></li>`;
   const barcode = Array.from({ length: 48 }, (_, i) => `<i style="width:${1 + ((i * 7) % 4)}px"></i>`).join("");
   $("#receipt").innerHTML = `
     <div class="receipt__paper">
@@ -450,7 +469,7 @@
       <ul>${D.perifericos.map(linea).join("")}</ul>
       <div class="receipt__tot"><span>Valor de referencia</span><b class="${precio ? "strike" : ""}">${fmt(totalRef)}</b></div>
       ${precio
-        ? `${ahorro ? `<div class="receipt__tot receipt__tot--save"><span>Descuento</span><b>−${fmt(ahorro)}</b></div>` : ""}
+        ? `${ahorro ? `<div class="receipt__tot receipt__tot--save"><span>Descuento (${ahorroPct}%)</span><b>−${fmt(ahorro)}</b></div>` : ""}
            <div class="receipt__tot receipt__tot--big"><span>Total a pagar</span><b>${fmt(precio)}</b></div>`
         : `<div class="receipt__tot receipt__tot--big"><span>Precio de venta</span><b>Consultar</b></div>`}
       ${C.notaPrecios ? `<p class="receipt__note">* ${esc(C.notaPrecios)}</p>` : ""}
